@@ -7,9 +7,10 @@ use App\Models\QuizClass;
 
 class DashboardController extends Controller
 {
-    public function index()
-    {
-        $quizClasses = QuizClass::where('teacher_id', auth()->id())->get();
-        return view('teacher.dashboard', compact('quizClasses'));
+    public function index(){
+        $user = auth()->user(); 
+        $quizClasses = $user->quizClasses()->get();
+
+        return view("dashboard",compact("quizClasses"));
     }
 }
