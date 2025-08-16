@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuizClassController;
+use App\Http\Controllers\QuestionSetController;
 use App\Http\Controllers\StudentClassController;
 use App\Http\Controllers\TeacherDashboardController;
 use Illuminate\Support\Facades\Route;
@@ -18,9 +19,22 @@ Route::get('/teacher/dashboard', [TeacherDashboardController::class, 'index'])->
 Route::get('/teacher/create', [QuizClassController::class, 'create'])->name('quizclasses.create');
 Route::post('/teacher', [QuizClassController::class, 'store'])->name('quizclasses.store');
 
-Route::get('/teacher/quizclass/{id}', [QuizClassController::class, 'show'])->middleware(['auth', 'verified'])->name('teacher.quizclass');
-Route::get('/quizclasses/{id}/edit', [QuizClassController::class, 'edit'])->middleware(['auth', 'verified'])->name('quizclasses.edit');
-Route::put('/quizclasses/{id}', [QuizClassController::class, 'update'])->middleware(['auth', 'verified'])->name('quizclasses.update');
+Route::get('/teacher/quizclass/{quizClass}', [QuizClassController::class, 'show'])->middleware(['auth', 'verified'])->name('teacher.quizclass');
+Route::get('/quizclasses/{quizClass}/edit', [QuizClassController::class, 'edit'])->middleware(['auth', 'verified'])->name('quizclasses.edit');
+Route::put('/quizclasses/{quizClass}', [QuizClassController::class, 'update'])->middleware(['auth', 'verified'])->name('quizclasses.update');
+
+Route::get('/quizclasses/{quizClass}/questionsets/create', [QuestionSetController::class, 'create'])
+    ->middleware(['auth', 'verified'])
+    ->name('quizclasses.questionsets.create');
+
+Route::post('/quizclasses/{quizClass}/questionsets', [QuestionSetController::class, 'store'])
+    ->middleware(['auth', 'verified'])
+    ->name('quizclasses.questionsets.store');
+
+Route::get('/teacher/quizclass/{quizClass}/questionsets/{questionSet}', [QuestionSetController::class, 'show'])->middleware(['auth', 'verified'])->name('teacher.quizclass.questionset');
+
+Route::delete('/studentclasses/{classId}/{studentId}', [StudentClassController::class, 'destroy'])
+     ->name('studentclasses.destroy');
 
 
 // global routes

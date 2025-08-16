@@ -32,4 +32,19 @@ class StudentClassController extends Controller
 
         return redirect()->route('dashboard')->with('success', 'Successfully joined class.');
     }
+
+    public function destroy($studentId, $classId)
+    {
+        $studentClass = StudentClass::where('student_id', $studentId)
+            ->where('class_id', $classId)
+            ->first();
+
+        if ($studentClass) {
+            $studentClass->delete();
+            return redirect()->back()->with('success', 'Student removed from the class.');
+        }
+
+        return redirect()->back()->with('error', 'Student not found in this class.');
+    }
+
 }
