@@ -14,9 +14,30 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="//unpkg.com/alpinejs" defer></script> <!-- Alpine.js -->
 </head>
 
 <body class="font-sans antialiased">
+    <!-- Success and error message -->
+    <div class="fixed top-4 inset-x-0 flex justify-center z-50">
+        <div class="w-full max-w-md space-y-2">
+
+            @if (session('success'))
+                <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show" x-transition
+                    class="bg-green-500 text-black px-6 py-3 rounded shadow-lg text-center">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show" x-transition
+                    class="bg-red-500 text-black px-6 py-3 rounded shadow-lg text-center">
+                    {{ session('error') }}
+                </div>
+            @endif
+        </div>
+    </div>
+
     <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
         <!-- Page Heading -->
         @isset($header)
@@ -31,25 +52,6 @@
         <main>
             {{ $slot }}
         </main>
-
-        @if (session('success'))
-            <div x-data="{ show: true }" x-init="$nextTick(() => setTimeout(() => show = false, 3000))" x-show="show"
-                x-transition:enter="transition ease-out duration-500" x-transition:enter-start="translate-y-full opacity-0"
-                x-transition:enter-end="translate-y-0 opacity-100" x-transition:leave="transition ease-in duration-500"
-                x-transition:leave-start="translate-y-0 opacity-100" x-transition:leave-end="translate-y-full opacity-0"
-                class="fixed-success bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50">
-                {{ session('success') }}
-            </div>
-        @endif
-        @if (session('error'))
-            <div x-data="{ show: true }" x-init="$nextTick(() => setTimeout(() => show = false, 3000))" x-show="show"
-                x-transition:enter="transition ease-out duration-500" x-transition:enter-start="translate-y-full opacity-0"
-                x-transition:enter-end="translate-y-0 opacity-100" x-transition:leave="transition ease-in duration-500"
-                x-transition:leave-start="translate-y-0 opacity-100" x-transition:leave-end="translate-y-full opacity-0"
-                class="fixed-success bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50">
-                {{ session('error') }}
-            </div>
-        @endif
     </div>
 </body>
 
