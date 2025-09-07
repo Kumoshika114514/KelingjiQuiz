@@ -12,4 +12,17 @@ class TeacherDashboardController extends Controller
         $quizClasses = QuizClass::where('teacher_id', auth()->id())->get();
         return view('teacher.dashboard', compact('quizClasses'));
     }
+
+    public function loadClasses()
+    {
+        $quizClasses = QuizClass::where('teacher_id', auth()->id())
+            ->get(['id', 'name', 'created_at']);
+
+        return response()->json([
+            'classes' => $quizClasses,
+        ]);
+    }
+
+
+
 }

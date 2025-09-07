@@ -33,7 +33,7 @@ class StudentClassController extends Controller
         return redirect()->route('dashboard')->with('success', 'Successfully joined class.');
     }
 
-    public function destroy($studentId, $classId)
+    public function destroy($classId, $studentId)
     {
         $studentClass = StudentClass::where('student_id', $studentId)
             ->where('class_id', $classId)

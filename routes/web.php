@@ -19,7 +19,9 @@ Route::get('/teacher/dashboard', [TeacherDashboardController::class, 'index'])->
 Route::get('/teacher/create', [QuizClassController::class, 'create'])->name('quizclasses.create');
 Route::post('/teacher', [QuizClassController::class, 'store'])->name('quizclasses.store');
 
-Route::get('/teacher/quizclass/{quizClass}', [QuizClassController::class, 'show'])->middleware(['auth', 'verified'])->name('teacher.quizclass');
+Route::get('/teacher/quizclass/{quizClass}', function ($quizClassId) {
+    return view('teacher.quizclass', ['quizClassId' => $quizClassId]);
+})->middleware(['auth', 'verified'])->name('teacher.quizclass');
 Route::get('/quizclasses/{quizClass}/edit', [QuizClassController::class, 'edit'])->middleware(['auth', 'verified'])->name('quizclasses.edit');
 Route::put('/quizclasses/{quizClass}', [QuizClassController::class, 'update'])->middleware(['auth', 'verified'])->name('quizclasses.update');
 
@@ -34,7 +36,7 @@ Route::post('/quizclasses/{quizClass}/questionsets', [QuestionSetController::cla
 Route::get('/teacher/quizclass/{quizClass}/questionsets/{questionSet}', [QuestionSetController::class, 'show'])->middleware(['auth', 'verified'])->name('teacher.quizclass.questionset');
 
 Route::delete('/studentclasses/{classId}/{studentId}', [StudentClassController::class, 'destroy'])
-     ->name('studentclasses.destroy');
+    ->name('studentclasses.destroy');
 
 
 // global routes
@@ -51,5 +53,19 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// API routes
+Route::middleware(['auth', 'verified'])->prefix('api/teacher')->group(function () {
+    Route::get('dashboard', [TeacherDashboardController::class, 'loadClasses']);
+
+    Route::get('/quizclass/{quizclass}', [QuizClassController::class, 'loadQuizClassDetail']);
+
+    Route::get('/quizclass/{quizclass}/questionsets', [QuizClassController::class, 'loadClassQuestionSets']);
+
+    Route::get('/quizclass/{quizclass}/students', [QuizClassController::class, 'loadClassStudents']);
+
+});
+
+
 
 require __DIR__ . '/auth.php';

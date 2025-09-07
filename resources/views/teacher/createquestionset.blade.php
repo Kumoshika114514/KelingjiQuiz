@@ -10,7 +10,7 @@
     <div class="max-w-xl mx-auto mt-8">
         <div class="bg-white shadow rounded-lg p-6 mt-6">
             <!-- Back Button -->
-            <a href="{{ route('teacher.quizclass', $quizclassId) }}"
+            <a href="javascript:history.back()"
                 class="inline-flex items-center text-gray-600 hover:text-gray-900 transition">
                 &lt; Back
             </a>

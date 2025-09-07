@@ -39,6 +39,7 @@ class QuizClassController extends Controller
         return $code;
     }
 
+    // Original quiz class show function (not using)
     public function show($id)
     {
         $quizClass = QuizClass::with(['students', 'questionSets'])->findOrFail($id);
@@ -47,6 +48,47 @@ class QuizClassController extends Controller
             abort(403, 'Unauthorized');
         }
         return view('teacher.quizclass', compact('quizClass'));
+    }
+
+    // API for fetching all quizclasses
+    public function loadQuizClassDetail($id)
+    {
+        $quizClass = QuizClass::findOrFail($id);
+
+        // Only allow the owner (teacher)
+        if ($quizClass->teacher_id !== auth()->id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        return response()->json([
+            'quizClass' => $quizClass,
+        ], 200);
+    }
+
+    public function loadClassQuestionSets($id)
+    {
+        $quizClass = QuizClass::with('questionSets')->findOrFail($id);
+
+        if ($quizClass->teacher_id !== auth()->id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        return response()->json([
+            'questionSets' => $quizClass->questionSets,
+        ], 200);
+    }
+
+    public function loadClassStudents($id)
+    {
+        $quizClass = QuizClass::with('students')->findOrFail($id);
+
+        if ($quizClass->teacher_id !== auth()->id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        return response()->json([
+            'students' => $quizClass->students,
+        ], 200);
     }
 
     public function edit($id)
@@ -64,7 +106,7 @@ class QuizClassController extends Controller
             'description' => 'required|string|max:255'
         ]);
 
-        $quizClass->update(['name'=> $request->name, 'description'=> $request->description]);
+        $quizClass->update(['name' => $request->name, 'description' => $request->description]);
 
         return redirect()->route('teacher.quizclass', $quizClass->id)
             ->with('success', 'Class updated successfully.');
