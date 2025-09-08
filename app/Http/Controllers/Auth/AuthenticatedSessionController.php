@@ -37,7 +37,7 @@ class AuthenticatedSessionController extends Controller
         $failuresKey = 'login:failed:' . strtolower($email);
         $suspendKey = $user ? 'login:suspend:user:' . $user->id : null;
 
-        // 1) Early suspension check (same as before)
+        // 1) Early suspension check 
         if ($user && $suspendKey && Cache::has($suspendKey)) {
             $until = Cache::get($suspendKey);
             $untilCarbon = $until instanceof Carbon ? $until : Carbon::parse($until);
@@ -74,21 +74,21 @@ class AuthenticatedSessionController extends Controller
                 ->withInput($request->except('password'));
         }
 
-        // Regenerate session for security (keep this)
+        // Regenerate session for security 
         $request->session()->regenerate();
 
         // 3) Role check — normalize values
         $selectedRole = strtolower(trim((string) $request->input('role', '')));
         $userRole = strtolower(trim((string) (auth()->user()->role ?? '')));
 
-        // Debug log (optional)
+        // Debug log 
         \Log::info('Login role check', [
             'email' => $email,
             'selectedRole' => $selectedRole,
             'userRole' => $userRole,
         ]);
 
-        // If role mismatch -> count failure (same logic) and logout
+        // If role mismatch -> count failure (same logic)
         if ($selectedRole !== $userRole) {
             if ($user) {
                 $duration = $this->handleFailedAttempt($user, $failuresKey, $suspendKey);
@@ -110,7 +110,7 @@ class AuthenticatedSessionController extends Controller
             ])->withInput($request->except('password'));
         }
 
-        // 4) Now login is fully successful (credentials + role) — clear counters
+        // 4) Now login is fully successful (credentials + role), and clear counters
         if ($user) {
             Cache::forget($failuresKey);
             if ($suspendKey)
@@ -131,11 +131,6 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle a failed login-related attempt (password or role mismatch).
      * Increments the failure counter and, if thresholds reached, sets a suspension and notifies the user.
-     *
-     * @param  \App\Models\User  $user
-     * @param  string            $failuresKey
-     * @param  string|null       $suspendKey
-     * @return int|null          Suspension duration in minutes if applied, otherwise null
      */
     protected function handleFailedAttempt(User $user, string $failuresKey, ?string $suspendKey): ?int
     {
