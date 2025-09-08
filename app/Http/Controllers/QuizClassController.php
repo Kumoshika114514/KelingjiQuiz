@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Response;
 
+use App\Facades\Statistic;
 use App\Models\QuizClass;
 use Illuminate\Http\Request;
 
@@ -71,25 +72,34 @@ class QuizClassController extends Controller
     public function loadClassQuestionSets($id)
     {
         $quizClass = QuizClass::with('questionSets')->findOrFail($id);
+        $totalQuestionSets = Statistic::totalQuestionSetInClass($id);
+        $questionSets = $quizClass->questionSets->map(function ($set) {
+            $set->highest_score = Statistic::getHighestScoreInQuiz($set->id);
+            return $set;
+        });
+
 
         if ($quizClass->user_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         return Response::json([
-            'questionSets' => $quizClass->questionSets,
+            'totalQuestionSets' => $totalQuestionSets,
+            'questionSets' => $questionSets,
         ], 200);
     }
 
     public function loadClassStudents($id)
     {
         $quizClass = QuizClass::with('students')->findOrFail($id);
+        $totalStudents = Statistic::totalStudentsInClass($id);
 
         if ($quizClass->user_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         return Response::json([
+            'totalStudents' => $totalStudents,
             'students' => $quizClass->students,
         ], 200);
     }

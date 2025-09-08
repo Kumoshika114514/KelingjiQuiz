@@ -13,17 +13,27 @@
 
     <div class="py-10">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 mt-6">
-            <div x-data="{ quizClasses: [] }" x-init="fetch('/api/teacher/dashboard')
+            <div x-data="{ quizClasses: [], totalClasses: 0 }" x-init="fetch('/api/teacher/dashboard')
                 .then(res => res.json())
-                .then(data => quizClasses = data.classes)" class="space-y-6">
+                .then(data => { 
+                    quizClasses = data.classes; 
+                    totalClasses = data.totalClasses;
+                    })" 
+                class="space-y-6">
 
-                <!-- If no result found -->
+                <!-- show number of classes -->
+                <div class="text-lg font-semibold text-gray-800" x-show="totalClasses > 0">
+                    Total Class: <span x-text="totalClasses"></span>
+                </div>
+
+                <!-- default message if no result found -->
                 <template x-if="quizClasses.length === 0">
                     <div class="bg-white shadow rounded-lg p-6 text-center">
                         <p class="text-gray-600">You don't have any classes yet.</p>
                     </div>
                 </template>
 
+                <!-- classes -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" x-show="quizClasses.length > 0"
                     x-cloak>
                     <template x-for="cls in quizClasses" :key="cls.id">

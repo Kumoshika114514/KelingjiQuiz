@@ -62,10 +62,12 @@ Route::middleware(['auth', 'verified'])->prefix('api/teacher')->group(function (
 
     Route::get('/quizclass/{quizclass}/questionsets', [QuizClassController::class, 'loadClassQuestionSets']);
 
+    Route::get('/quizclass/{quizclass}/questionsets/{questionset}/highestscore', [QuestionSetController::class, 'getHighestScore']);
+
+    Route::patch('/quizclass/{quizclass}/questionsets/{questionset}/toggle', [QuestionSetController::class, 'toggleStatus']);
+
     Route::get('/quizclass/{quizclass}/students', [QuizClassController::class, 'loadClassStudents']);
 
 });
-
-
 
 require __DIR__ . '/auth.php';

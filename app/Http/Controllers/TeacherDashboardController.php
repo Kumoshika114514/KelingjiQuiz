@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Facades\Statistic;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
 
@@ -18,8 +19,10 @@ class TeacherDashboardController extends Controller
     {
         $quizClasses = QuizClass::where('user_id', Auth::id())
             ->get(['id', 'name', 'created_at']);
+        $totalClasses = Statistic::totalClassesByTeacher(Auth::id());
 
         return Response::json([
+            'totalClasses' => $totalClasses,
             'classes' => $quizClasses,
         ]);
     }

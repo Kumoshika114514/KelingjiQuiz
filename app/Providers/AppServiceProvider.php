@@ -11,7 +11,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton('statisticservice', function () {
+            return new \App\Services\StatisticService();
+        });
     }
 
     /**
