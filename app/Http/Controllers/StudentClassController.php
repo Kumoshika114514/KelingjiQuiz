@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
 
 use Illuminate\Http\Request;
 use App\Models\QuizClass;
@@ -26,11 +28,11 @@ class StudentClassController extends Controller
         }
 
         StudentClass::firstOrCreate([
-            'student_id' => auth()->id(),
+            'student_id' => Auth::id(),
             'class_id' => $quizClass->id,
         ]);
 
-        return redirect()->route('dashboard')->with('success', 'Successfully joined class.');
+        return Redirect::route('dashboard')->with('success', 'Successfully joined class.');
     }
 
     public function destroy($classId, $studentId)
@@ -41,10 +43,10 @@ class StudentClassController extends Controller
 
         if ($studentClass) {
             $studentClass->delete();
-            return redirect()->back()->with('success', 'Student removed from the class.');
+            return Redirect::back()->with('success', 'Student removed from the class.');
         }
 
-        return redirect()->back()->with('error', 'Student not found in this class.');
+        return Redirect::back()->with('error', 'Student not found in this class.');
     }
 
 }

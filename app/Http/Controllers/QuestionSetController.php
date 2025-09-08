@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
 
 use App\Models\QuizClass;
 use App\Models\QuestionSet;
@@ -40,12 +42,11 @@ class QuestionSetController extends Controller
             'end_time' => $validated['end_time'],
             'is_realtime' => $request->has('is_realtime'),
             'is_active' => true,
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
         ]);
 
         // Redirect back to the quizclass page
-        return redirect()
-            ->route('teacher.quizclass', $quizClassId)
+        return Redirect::route('teacher.quizclass', $quizClassId)
             ->with('success', 'Question set created successfully.');
     }
 

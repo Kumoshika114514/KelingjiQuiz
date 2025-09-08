@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Response;
 
 use App\Models\QuizClass;
 use Illuminate\Http\Request;
@@ -20,10 +23,10 @@ class QuizClassController extends Controller
             'name' => $request->input('name'),
             'description' => $request->input('description'),
             'class_code' => $code,
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
         ]);
 
-        return redirect()->route('teacher.dashboard')->with('success', 'Class created successfully!');
+        return Redirect::route('teacher.dashboard')->with('success', 'Class created successfully!');
     }
     private function generateUniqueClassCode($length = 10)
     {
@@ -44,7 +47,7 @@ class QuizClassController extends Controller
     {
         $quizClass = QuizClass::with(['students', 'questionSets'])->findOrFail($id);
 
-        if ($quizClass->teacher_id != auth()->id()) {
+        if ($quizClass->teacher_id != Auth::id()) {
             abort(403, 'Unauthorized');
         }
         return view('teacher.quizclass', compact('quizClass'));
@@ -56,11 +59,11 @@ class QuizClassController extends Controller
         $quizClass = QuizClass::findOrFail($id);
 
         // Only allow the owner (teacher)
-        if ($quizClass->user_id !== auth()->id()) {
+        if ($quizClass->user_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        return response()->json([
+        return Response::json([
             'quizClass' => $quizClass,
         ], 200);
     }
@@ -69,11 +72,11 @@ class QuizClassController extends Controller
     {
         $quizClass = QuizClass::with('questionSets')->findOrFail($id);
 
-        if ($quizClass->user_id !== auth()->id()) {
+        if ($quizClass->user_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        return response()->json([
+        return Response::json([
             'questionSets' => $quizClass->questionSets,
         ], 200);
     }
@@ -82,11 +85,11 @@ class QuizClassController extends Controller
     {
         $quizClass = QuizClass::with('students')->findOrFail($id);
 
-        if ($quizClass->user_id !== auth()->id()) {
+        if ($quizClass->user_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        return response()->json([
+        return Response::json([
             'students' => $quizClass->students,
         ], 200);
     }
@@ -108,7 +111,7 @@ class QuizClassController extends Controller
 
         $quizClass->update(['name' => $request->name, 'description' => $request->description]);
 
-        return redirect()->route('teacher.quizclass', $quizClass->id)
+        return Redirect::route('teacher.quizclass', $quizClass->id)
             ->with('success', 'Class updated successfully.');
     }
 }
