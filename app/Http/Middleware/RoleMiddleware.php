@@ -16,8 +16,19 @@ class RoleMiddleware
      */
     public function handle(Request $request, Closure $next, $role): Response
     {
-        if (!Auth::check() || Auth::user()->role !== $role) {
-            return redirect()->route('login')->with('error', 'Access denied.');
+        // If not logged in
+        if (!Auth::check()) {
+            // redirect to login page for users that are not logged in
+            return redirect()->route('login');
+        }
+
+         // If logged in but wrong role
+        if (Auth::user()->role !== $role) {
+            // Return a custom error view instead of redirecting to login
+            return response()->view('errors.role_denied', [
+                'expectedRole' => $role,
+                'actualRole'   => Auth::user()->role,
+            ], 403); // 403 Forbidden Error
         }
 
         return $next($request);

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\RoleMiddleware;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuizClassController;
@@ -9,11 +10,15 @@ use App\Http\Controllers\TeacherDashboardController;
 use Illuminate\Support\Facades\Route;
 
 // student's routes
-Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
-Route::get('/join', [StudentClassController::class, 'create'])->middleware(['auth', 'verified'])->name('studentclasses.join');
-Route::post('/', [StudentClassController::class, 'store'])->middleware(['auth', 'verified'])->name('studentclasses.store');
+Route::middleware(['auth', RoleMiddleware::class . ':student'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+    Route::get('/join', [StudentClassController::class, 'create'])->middleware(['auth', 'verified'])->name('studentclasses.join');
+    Route::post('/', [StudentClassController::class, 'store'])->middleware(['auth', 'verified'])->name('studentclasses.store');
+});
 
 //teacher's routes
+Route::middleware(['auth', RoleMiddleware::class . ':teacher'])->group(function () {
+
 Route::get('/teacher/dashboard', [TeacherDashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('teacher.dashboard');
 
 Route::get('/teacher/create', [QuizClassController::class, 'create'])->name('quizclasses.create');
@@ -37,6 +42,7 @@ Route::get('/teacher/quizclass/{quizClass}/questionsets/{questionSet}', [Questio
 
 Route::delete('/studentclasses/{classId}/{studentId}', [StudentClassController::class, 'destroy'])
     ->name('studentclasses.destroy');
+});
 
 
 // global routes
@@ -53,6 +59,22 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+//User preferences 
+Route::get('/user-preferences', function () {
+    return response()->json([
+        'theme' => session('theme', null),
+        'font_size' => session('font_size', null),
+    ]);
+})->middleware('web');
+
+//for authenticated users only
+Route::post('/user-preferences', function (Request $request) {
+    $request->validate(['theme' => 'required|in:light,dark']);
+    session(['theme' => $request->input('theme')]);
+    return response()->json(['ok' => true]);
+})->middleware(['web', 'auth']);
+
 
 // API routes
 Route::middleware(['auth', 'verified'])->prefix('api/teacher')->group(function () {

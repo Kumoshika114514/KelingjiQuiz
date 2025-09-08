@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" 
+class="{{ session('theme','light') === 'dark' ? 'dark' : '' }}">
 
 <head>
     <meta charset="utf-8">
@@ -14,7 +15,24 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script src="//unpkg.com/alpinejs" defer></script> <!-- Alpine.js -->
+    <script src="//unpkg.com/alpinejs" defer>
+        (function () {
+            let theme = '{{ session('theme', 'light') }}';
+            if (!theme || theme === 'null') {
+                // fallback to localStorage if session not set
+                theme = localStorage.getItem('color-theme') || 'light';
+            }
+
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');   
+            }
+
+            try { document.documentElement.setAttribute('data-theme-initialized', '1'); } catch (e) {}
+  }
+        )();
+    </script> <!-- Alpine.js -->
 </head>
 
 <body class="font-sans antialiased">

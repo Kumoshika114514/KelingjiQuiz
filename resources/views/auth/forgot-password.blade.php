@@ -21,5 +21,12 @@
                 {{ __('Email Password Reset Link') }}
             </x-primary-button>
         </div>
+
+        <div class="flex items-center justify-between mt-4">
+            <!-- Back Button -->
+            <a href="{{ route('login') }}"
+               class="inline-block bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition">
+                {{ __('Back') }}
+            </a>
     </form>
 </x-guest-layout>

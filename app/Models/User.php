@@ -34,6 +34,18 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    // for differentiate students and teachers role
+     public function isStudent(): bool
+    {
+        return $this->role === 'student';
+    }
+
+    public function isTeacher(): bool
+    {
+        return $this->role === 'teacher';
+    }
+
+
     /**
      * Get the attributes that should be cast.
      *
