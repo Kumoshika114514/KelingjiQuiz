@@ -20,7 +20,7 @@ class QuizClassController extends Controller
             'name' => $request->input('name'),
             'description' => $request->input('description'),
             'class_code' => $code,
-            'teacher_id' => auth()->id(),
+            'user_id' => auth()->id(),
         ]);
 
         return redirect()->route('teacher.dashboard')->with('success', 'Class created successfully!');
@@ -56,7 +56,7 @@ class QuizClassController extends Controller
         $quizClass = QuizClass::findOrFail($id);
 
         // Only allow the owner (teacher)
-        if ($quizClass->teacher_id !== auth()->id()) {
+        if ($quizClass->user_id !== auth()->id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -69,7 +69,7 @@ class QuizClassController extends Controller
     {
         $quizClass = QuizClass::with('questionSets')->findOrFail($id);
 
-        if ($quizClass->teacher_id !== auth()->id()) {
+        if ($quizClass->user_id !== auth()->id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -82,7 +82,7 @@ class QuizClassController extends Controller
     {
         $quizClass = QuizClass::with('students')->findOrFail($id);
 
-        if ($quizClass->teacher_id !== auth()->id()) {
+        if ($quizClass->user_id !== auth()->id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 

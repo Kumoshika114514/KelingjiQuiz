@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class QuizClass extends Model
 {
-    protected $fillable = ['name', 'description', 'class_code', 'teacher_id',];
+    protected $fillable = ['name', 'description', 'class_code', 'user_id',];
 
     public function teacher()
     {
-        return $this->belongsTo(User::class, 'teacher_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
     public function studentClasses()
     {
