@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
-
+use App\Facades\Statistic;
 use App\Models\QuizClass;
 use App\Models\QuestionSet;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
 
 class QuestionSetController extends Controller
 {
