@@ -1,10 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Facades\Statistic;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Response;
 
 use App\Models\QuizClass;
 use App\Models\QuestionSet;
@@ -44,6 +42,7 @@ class QuestionSetController extends Controller
             'end_time' => $validated['end_time'],
             'is_realtime' => $request->has('is_realtime'),
             'is_active' => true,
+            'question_count'=> 0, 
             'user_id' => Auth::id(),
         ]);
 
@@ -59,38 +58,5 @@ class QuestionSetController extends Controller
         return view('teacher.questionset', compact('questionSet'));
     }
 
-    public function toggleStatus($quizclass, $questionset)
-    {
-        try {
-            $set = QuestionSet::findOrFail($questionset);
-            // 1 is active, 0 is disabled
-            $set->status = $set->status === 1 ? 0 : 1;
-            $set->save();
 
-            return Response::json([
-                'success' => true,
-                'status' => $set->status,
-                'message' => $set->status === 1
-                    ? 'Question set activated.'
-                    : 'Question set closed.'
-            ], 200);
-
-        } catch (\Exception $e) {
-            return Response::json([
-                'success' => false,
-                'message' => 'Failed to toggle status.',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
-
-
-    public function getHighestScore($quizclass, $questionset)
-    {
-        $highestScore = Statistic::getHighestScoreInQuiz($questionset);
-
-        return Response::json([
-            'highestScore' => $highestScore,
-        ], 200);
-    }
 }
