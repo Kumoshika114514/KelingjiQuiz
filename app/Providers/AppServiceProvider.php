@@ -5,7 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Auth\Events\Login;
-use App\Listeners\SavePreferencesOnLogin;
+use App\Http\Listeners\SavePreferencesOnLogin;
 use Illuminate\Support\Facades\View;
 
 class AppServiceProvider extends ServiceProvider
