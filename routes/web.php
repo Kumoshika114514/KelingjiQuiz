@@ -8,6 +8,7 @@ use App\Http\Controllers\StudentClassController;
 use App\Http\Controllers\TeacherDashboardController;
 use App\Http\Controllers\QuestionController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\RoleMiddleware;
 
 // student's routes
 Route::middleware(['auth', RoleMiddleware::class . ':student'])->group(function () {
