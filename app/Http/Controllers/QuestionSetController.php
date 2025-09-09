@@ -58,5 +58,39 @@ class QuestionSetController extends Controller
         return view('teacher.questionset', compact('questionSet'));
     }
 
+     public function toggleStatus($quizclass, $questionset)
+    {
+        try {
+            $set = QuestionSet::findOrFail($questionset);
+            // 1 is active, 0 is disabled
+            $set->status = $set->status === 1 ? 0 : 1;
+            $set->save();
+
+            return Response::json([
+                'success' => true,
+                'status' => $set->status,
+                'message' => $set->status === 1
+                    ? 'Question set activated.'
+                    : 'Question set closed.'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return Response::json([
+                'success' => false,
+                'message' => 'Failed to toggle status.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
+    public function getHighestScore($quizclass, $questionset)
+    {
+        $highestScore = Statistic::getHighestScoreInQuiz($questionset);
+
+        return Response::json([
+            'highestScore' => $highestScore,
+        ], 200);
+    }
 
 }
