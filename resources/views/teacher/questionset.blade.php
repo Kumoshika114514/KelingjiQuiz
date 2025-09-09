@@ -34,6 +34,7 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <p class="dark:text-white">{{ $questionSet->topic}}</p>
             @if (session('success'))
                 <div class="mb-4 rounded-md bg-green-50 p-4 text-green-700">
                     {{ session('success') }}
