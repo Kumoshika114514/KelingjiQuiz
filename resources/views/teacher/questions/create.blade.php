@@ -17,14 +17,14 @@
     @endphp
 
     <div class="py-6">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
-            <div class="mb-4">
+        <div class="max-w-3xl mx-auto sm:rounded-lg lg:px-8 dark:bg-gray-100">
+            <div class="mb-4 dark:bg-gray-100 py-3">
                 <a href="{{ route('teacher.questions.index', [$quizClass->id, $questionSet->id]) }}"
-                   class="text-sm text-gray-600 hover:underline">← Back to Questions</a>
+                   class="text-l text-gray-600 inline-flex items-center hover:text-gray-900 transition">← Back to Questions</a>
             </div>
 
-            <div class="bg-white dark:bg-gray-900 shadow sm:rounded-lg">
-                <form class="p-6 space-y-6"
+            <div class="bg-white sm:rounded-lg dark:bg-gray-100">
+                <form class="space-y-6"
                       action="{{ route('teacher.questions.store', [$quizClass->id, $questionSet->id]) }}"
                       method="POST">
                     @csrf
@@ -44,24 +44,24 @@
 
                     <div>
                         <label class="block text-sm font-medium mb-1">Question Text</label>
-                        <textarea name="text" rows="4" class="w-full rounded border-gray-300 dark:bg-gray-800" required>{{ old('text') }}</textarea>
+                        <textarea name="text" rows="4" class="w-full rounded border-gray-300 dark:bg-white" required>{{ old('text') }}</textarea>
                     </div>
 
                     <div class="grid grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-medium mb-1">Points</label>
                             <input type="number" name="points" min="0" value="{{ old('points', 1) }}"
-                                   class="w-full rounded border-gray-300 dark:bg-gray-800" required>
+                                   class="w-full rounded border-gray-300 dark:bg-white" required>
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-1">Order (optional)</label>
                             <input type="number" name="order" min="0" value="{{ old('order') }}"
-                                   class="w-full rounded border-gray-300 dark:bg-gray-800">
+                                   class="w-full rounded border-gray-300 dark:bg-white">
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-1">Time Limit (sec, optional)</label>
                             <input type="number" name="time_limit_sec" min="5" value="{{ old('time_limit_sec') }}"
-                                   class="w-full rounded border-gray-300 dark:bg-gray-800">
+                                   class="w-full rounded border-gray-300 dark:bg-white">
                         </div>
                     </div>
 
@@ -74,13 +74,13 @@
                                     <input type="text"
                                            name="answer_{{ strtolower($opt) }}"
                                            value="{{ old('answer_'.strtolower($opt)) }}"
-                                           class="w-full rounded border-gray-300 dark:bg-gray-800" required>
+                                           class="w-full rounded border-gray-300 dark:bg-white" required>
                                 </div>
                             @endforeach
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-1">Correct Choice</label>
-                            <select name="correct_choice" class="w-full rounded border-gray-300 dark:bg-gray-800" required>
+                            <select name="correct_choice" class="w-full rounded border-gray-300 " required>
                                 @foreach (['A','B','C','D'] as $c)
                                     <option value="{{ $c }}" @selected(old('correct_choice')===$c)>{{ $c }}</option>
                                 @endforeach
@@ -112,11 +112,11 @@
                         <div>
                             <label class="block text-sm font-medium mb-1">Correct Answer (exact match)</label>
                             <input type="text" name="correct_text" value="{{ old('correct_text') }}"
-                                   class="w-full rounded border-gray-300 dark:bg-gray-800" required>
+                                   class="w-full rounded border-gray-300 dark:bg-white" required>
                         </div>
                     @endif
 
-                    <div class="pt-4">
+                    <div class="pt-4 py-4">
                         <button class="rounded-lg px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700">
                             Save Question
                         </button>

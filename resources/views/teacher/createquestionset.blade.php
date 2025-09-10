@@ -1,7 +1,7 @@
 <x-teacher>
     <x-slot name="header">
         <div class="flex items-center space-x-4">
-            <h2 class="text-2xl font-semibold text-gray-800 leading-tight">
+            <h2 class="text-2xl font-semibold text-gray-800 leading-tight dark:text-gray-200">
                 Create New Question Set
             </h2>
         </div>
