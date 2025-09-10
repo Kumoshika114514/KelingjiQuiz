@@ -1,3 +1,9 @@
+import './bootstrap';
+
+import Alpine from 'alpinejs';
+window.Alpine = Alpine;
+Alpine.start();
+
 (async function () {
   function applyPreferences(theme = 'light', font = 'md') {
     // Toggle dark class on <html>
