@@ -134,7 +134,7 @@
                         <div>
                             <label class="block text-sm font-medium mb-1">Correct Answer (exact match)</label>
                             <input type="text" name="correct_text" value="{{ old('correct_text') }}"
-                                   class="w-full rounded border-gray-300 dark:bg-gray-800" required>
+                                   class="w-full rounded border-gray-300 dark:bg-white" required>
                         </div>
                     @endif
 

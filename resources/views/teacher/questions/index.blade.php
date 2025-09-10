@@ -71,7 +71,7 @@
                                                href="{{ route('teacher.questions.show', [$quizClass->id, $questionSet->id, $q->id]) }}">View</a>
                                             <a class="text-gray-600 dark:text-gray-200 hover:underline"
                                                href="{{ route('teacher.questions.edit', [$quizClass->id, $questionSet->id, $q->id]) }}">Edit</a>
-                                            <a class="text-gray-600 hover:underline"
+                                            <a class="text-gray-600 dark:text-gray-200 hover:underline"
                                                href="{{ route('teacher.questions.preview', [$quizClass->id, $questionSet->id, $q->id]) }}">Preview</a>
                                             <form class="inline"
                                                   action="{{ route('teacher.questions.destroy', [$quizClass->id, $questionSet->id, $q->id]) }}"
