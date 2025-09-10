@@ -1,4 +1,4 @@
-<x-app-layout> 
+<x-app-layout>  
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">
             Questions — {{ $questionSet->topic }}
@@ -42,13 +42,13 @@
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-900 shadow sm:rounded-lg">
+            <div class="bg-gray-200 dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="p-6">
                     @if ($questions->isEmpty())
-                        <p class="text-gray-500 dark:text-gray-400">No questions yet.</p>
+                        <p class="text-gray-500 dark:text-white">No questions yet.</p>
                     @else
                         <table class="min-w-full text-sm">
-                            <thead class="text-left text-gray-600 dark:text-gray-300">
+                            <thead class="text-left text-gray-600 dark:text-white">
                                 <tr>
                                     <th class="py-2 pr-4">#</th>
                                     <th class="py-2 pr-4">Question</th>
@@ -59,15 +59,17 @@
                             </thead>
                             <tbody class="text-gray-800 dark:text-gray-100">
                                 @foreach ($questions as $q)
-                                    <tr class="border-t border-gray-200 dark:border-gray-700">
-                                        <td class="py-2 pr-4">{{ $q->id }}</td>
+                                    <tr class="border-t border-gray-400 dark:border-gray-700">
+                                        {{-- Per-set sequence number --}}
+                                        <td class="py-2 pr-4">{{ $loop->iteration }}</td>
+
                                         <td class="py-2 pr-4 max-w-xl truncate">{{ $q->text ?? '—' }}</td>
                                         <td class="py-2 pr-4">{{ $q->points ?? 0 }}</td>
                                         <td class="py-2 pr-4">{{ $q->order ?? 0 }}</td>
                                         <td class="py-2 pr-4 space-x-2">
                                             <a class="text-indigo-600 hover:underline"
                                                href="{{ route('teacher.questions.show', [$quizClass->id, $questionSet->id, $q->id]) }}">View</a>
-                                            <a class="text-blue-600 hover:underline"
+                                            <a class="text-gray-600 dark:text-gray-200 hover:underline"
                                                href="{{ route('teacher.questions.edit', [$quizClass->id, $questionSet->id, $q->id]) }}">Edit</a>
                                             <a class="text-gray-600 hover:underline"
                                                href="{{ route('teacher.questions.preview', [$quizClass->id, $questionSet->id, $q->id]) }}">Preview</a>
@@ -89,4 +91,4 @@
             </div>
         </div>
     </div>  
-</x-app-layout> 
+</x-app-layout>

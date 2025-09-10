@@ -2,16 +2,16 @@
 <x-teacher>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 id="className" class="font-semibold text-xl text-gray-800 leading-tight">Class</h2>
+            <h2 id="className" class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">Class</h2>
             <div class="flex items-center space-x-3">
                 <a href="{{ route('quizclasses.edit', $quizClassId) }}"
                     class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-2 rounded shadow-sm">
                     Edit
                 </a>
 
-                <a href="{{ route('quizclasses.questionsets.create', $quizClassId) }}"
-                    class="bg-blue-600 hover:bg-blue-700 dark:text-white px-3 py-2 rounded shadow">
-                    New Quiz
+                <a href="{{ route('teacher.dashboard') }}"
+                    class="inline-flex items-center rounded-lg px-4 py-2 bg-gray-100 text-gray-800 hover:bg-gray-200">
+                    ← Back
                 </a>
             </div>
 
@@ -31,7 +31,7 @@
                         <p class="mb-2" x-text="quizClass.description"></p>
 
                         <div class="flex items-center gap-2 mb-4">
-                            <span id="classCode" class="font-mono px-2 py-1 bg-gray-100 rounded"
+                            <span id="classCode" class="font-mono px-2 py-1 bg-gray-100 dark:bg-black rounded"
                                 x-text="shownCode">*****</span>
                             <button type="button" @click="toggleCode()"
                                 class="px-2 py-1 bg-blue-500 dark:text-white rounded hover:bg-blue-600">
@@ -43,10 +43,10 @@
             </div>
 
             <!-- tabs -->
-            <div class="flex items-end gap-2 mb-0">
+            <div class="flex items-end gap-2 mb-0 dark:bg-gray-800">
                 <button @click="showQuestions()"
-                    :class="active === 'questions' ? 'bg-white text-gray-900 -mb-1 z-20 shadow-md' : 'bg-gray-100 text-gray-600 translate-y-1 z-10'"
-                    class="px-4 py-2 rounded-t-lg border border-b-0 transition-all">
+                    :class="active === 'questions' ? 'bg-white text-gray-900 -mb-1 z-20 shadow-md dark:bg-gray-800' : 'bg-gray-100 text-gray-600 translate-y-1 z-10 dark:bg-gray-800'" 
+                    class="px-4 py-2 rounded-t-lg border border-b-0 transition-all dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600">
                     Question Sets
                     <span
                         class="ml-2 inline-flex items-center px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700"
@@ -55,7 +55,7 @@
 
                 <button @click="showStudents()"
                     :class="active === 'students' ? 'bg-white text-gray-900 -mb-1 z-20 shadow-md' : 'bg-gray-100 text-gray-600 translate-y-1 z-10'"
-                    class="px-4 py-2 rounded-t-lg border border-b-0 transition-all">
+                    class="px-4 py-2 rounded-t-lg border border-b-0  transition-all dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600">
                     Students Joined
                     <span
                         class="ml-2 inline-flex items-center px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700"
@@ -65,12 +65,12 @@
 
 
             <!-- main content -->
-            <div class="bg-white rounded-b-lg border border-t-0 shadow-sm p-6 mt-0">
+            <div class="bg-white rounded-b-lg border border-t-0 shadow-sm p-6 mt-0 dark:bg-gray-800 dark:border-gray-700">
 
                 <!-- question sets part (load by default) -->
                 <div x-show="active === 'questions'" x-transition>
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-gray-800">Question Sets</h3>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-300">Question Sets</h3>
                         <a href="{{ route('quizclasses.questionsets.create', $quizClassId) }}"
                             class="bg-blue-600 hover:bg-blue-700 dark:text-white px-3 py-2 rounded shadow">
                             New Quiz
@@ -150,7 +150,7 @@
 
                 <!-- students part (lazy loaded) -->
                 <div x-show="active === 'students'" x-transition>
-                    <h3 class="text-lg font-semibold mb-3 text-gray-800">Students Joined</h3>
+                    <h3 class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">Students Joined</h3>
                     <hr class="mb-4">
 
                     <template x-if="loadingStudents">
@@ -166,8 +166,8 @@
                             <template x-for="student in students" :key="student.id">
                                 <li class="flex items-center justify-between">
                                     <div>
-                                        <div class="font-medium text-gray-800" x-text="student.name"></div>
-                                        <div class="text-sm text-gray-500" x-text="student.email"></div>
+                                        <div class="font-medium text-gray-800 dark:text-gray-300" x-text="student.name"></div>
+                                        <div class="text-sm text-gray-500 dark:text-gray-400" x-text="student.email"></div>
                                     </div>
 
                                     <form :action="`/studentclasses/${quizClassId}/${student.id}`" method="POST"

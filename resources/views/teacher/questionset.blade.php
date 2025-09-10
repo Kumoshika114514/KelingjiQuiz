@@ -11,7 +11,7 @@
                     Manage Questions
                 </a>
                 <a href="{{ route('teacher.quizclass', $questionSet->class_id) }}"
-                   class="inline-flex items-center rounded-lg px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 hover:bg-gray-200">
+                   class="inline-flex items-center rounded-lg px-4 py-2 bg-gray-300 dark:bg-gray-800 text-gray-800 dark:text-gray-100 hover:bg-gray-200">
                     Back to Class
                 </a>
             </div>
@@ -57,38 +57,38 @@
             </div>
 
             {{-- Quick details --}}
-            <div class="bg-white dark:bg-gray-900 shadow sm:rounded-lg">
+            <div class="bg-gray-200 dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div class="space-y-1">
-                        <div class="text-gray-600 dark:text-gray-300">Question Type</div>
-                        <div class="font-medium text-gray-900 dark:text-gray-100">
+                        <div class="text-gray-600 dark:text-gray-200">Question Type</div>
+                        <div class="font-medium text-gray-900 dark:text-gray-200">
                             {{ strtoupper($questionSet->question_type) }}
                         </div>
                     </div>
 
                     <div class="space-y-1">
-                        <div class="text-gray-600 dark:text-gray-300">Answer Time (set)</div>
-                        <div class="font-medium text-gray-900 dark:text-gray-100">
+                        <div class="text-gray-600 dark:text-gray-200">Answer Time (set)</div>
+                        <div class="font-medium text-gray-900 dark:text-gray-200">
                             {{ $questionSet->answer_time }} min
                         </div>
                     </div>
 
                     <div class="space-y-1">
-                        <div class="text-gray-600 dark:text-gray-300">Start Time</div>
-                        <div class="font-medium text-gray-900 dark:text-gray-100">
+                        <div class="text-gray-600 dark:text-gray-200">Start Time</div>
+                        <div class="font-medium text-gray-900 dark:text-gray-200">
                             {{ $startStr }}
                         </div>
                     </div>
 
                     <div class="space-y-1">
-                        <div class="text-gray-600 dark:text-gray-300">End Time</div>
-                        <div class="font-medium text-gray-900 dark:text-gray-100">
+                        <div class="text-gray-600 dark:text-gray-200">End Time</div>
+                        <div class="font-medium text-gray-900 dark:text-gray-200">
                             {{ $endStr }}
                         </div>
                     </div>
 
                     <div class="space-y-1">
-                        <div class="text-gray-600 dark:text-gray-300">Active</div>
+                        <div class="text-gray-600 dark:text-gray-200">Active</div>
                         <div class="font-medium">
                             @if($questionSet->is_active)
                                 <span class="text-green-700 dark:text-green-400">Yes</span>
@@ -99,22 +99,22 @@
                     </div>
 
                     <div class="space-y-1">
-                        <div class="text-gray-600 dark:text-gray-300">Real-time Session</div>
-                        <div class="font-medium">
+                        <div class="text-gray-600 dark:text-gray-200">Real-time Session</div>
+                        <div class="font-medium text-gray-500 dark:text-gray-200">
                             {{ $questionSet->is_realtime ? 'Enabled' : 'Disabled' }}
                         </div>
                     </div>
 
                     <div class="space-y-1">
-                        <div class="text-gray-600 dark:text-gray-300">Question Count</div>
-                        <div class="font-medium text-gray-900 dark:text-gray-100">
+                        <div class="text-gray-600 dark:text-gray-200">Question Count</div>
+                        <div class="font-medium text-gray-900 dark:text-gray-200">
                             {{ $questionSet->question_count ?? 0 }}
                         </div>
                     </div>
 
                     <div class="space-y-1 md:col-span-2">
-                        <div class="text-gray-600 dark:text-gray-300">Description</div>
-                        <div class="font-medium text-gray-900 dark:text-gray-100">
+                        <div class="text-gray-600 dark:text-gray-200">Description</div>
+                        <div class="font-medium text-gray-900 dark:text-gray-200">
                             {{ $questionSet->description ?? '—' }}
                         </div>
                     </div>

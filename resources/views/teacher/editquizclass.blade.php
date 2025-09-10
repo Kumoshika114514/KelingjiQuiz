@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center space-x-4">
             <!-- Page Title -->
-            <h2 class="text-2xl font-semibold text-gray-800 leading-tight">
+            <h2 class="text-2xl font-semibold text-gray-800 dark:text-white leading-tight">
                 Edit Class
             </h2>
         </div>
