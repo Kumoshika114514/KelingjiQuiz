@@ -9,13 +9,13 @@ use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Api\Auth\LoginController;
+use App\Events\AccountSuspended as AccountSuspendedEvent;
 
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\ValidationException;
+
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
@@ -195,15 +195,12 @@ class AuthenticatedSessionController extends Controller
             $until = Carbon::now()->addMinutes($duration);
             // store suspension until time; TTL = seconds of duration
             Cache::put($suspendKey, $until, $duration * 60);
+            $until = Carbon::now()->addMinutes($duration);
+            Cache::put($suspendKey, $until, $duration * 60);
 
-            // Try to send email notification
-            try {
-                Mail::to($user->email)->send(new AccountSuspended($user->name ?? $user->email, $duration));
-            } catch (\Throwable $mailEx) {
-                // log but continue
-                Log::warning('Failed to send suspension email: ' . $mailEx->getMessage());
-            }
+            event(new AccountSuspendedEvent($user, $duration, $until, 'multiple failed login attempts'));
 
+            
             /* Log into laravel.log to show user suspended
             Log::info('User suspended', [
                 'user_id' => $user->id,
