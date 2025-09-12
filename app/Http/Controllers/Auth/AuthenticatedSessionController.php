@@ -227,6 +227,6 @@ class AuthenticatedSessionController extends Controller
         $forgetTheme = cookie()->forget('theme');
         $forgetFont = cookie()->forget('font_size');
 
-        return redirect('/')->withCookies([$forgetTheme, $forgetFont]);
+        return redirect('/login')->withCookies([$forgetTheme, $forgetFont]);
     }
 }
