@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers\Auth;
-
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Mail\AccountSuspended;
@@ -9,6 +8,9 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Api\Auth\LoginController;
+
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
@@ -18,6 +20,7 @@ use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
 {
+
     /**
      * Display the login view.
      */
@@ -27,42 +30,78 @@ class AuthenticatedSessionController extends Controller
     }
 
     /**
-     * Handle an incoming authentication request.
+     * Handle an incoming authentication request. (including API)
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $email = (string) $request->input('email');
+        $email = (string) strtolower($request->input('email', ''));
         $user = User::where('email', $email)->first();
 
-        $failuresKey = 'login:failed:' . strtolower($email);
+        $failuresKey = 'login:failed:' . $email;
         $suspendKey = $user ? 'login:suspend:user:' . $user->id : null;
 
-        // 1) Early suspension check 
-        if ($user && $suspendKey && Cache::has($suspendKey)) {
-            $until = Cache::get($suspendKey);
-            $untilCarbon = $until instanceof Carbon ? $until : Carbon::parse($until);
+        try {
+            $apiController = app(LoginController::class);
+            $apiResponse = app()->call([$apiController, 'login'], ['request' => $request]);
+        } catch (\Throwable $ex) {
+            Log::error('Error calling API login from web store(): ' . $ex->getMessage(), [
+                'exception' => $ex,
+                'email' => $request->input('email'),
+            ]);
 
-            if (Carbon::now()->lt($untilCarbon)) {
-                $remaining = Carbon::now()->diffInSeconds($untilCarbon);
-                $mins = floor($remaining / 60);
-                $secs = $remaining % 60;
-                $message = $mins > 0
-                    ? "Your account is temporarily suspended for another {$mins} minute(s) and {$secs} second(s). Please try again later."
-                    : "Your account is temporarily suspended for another {$secs} second(s). Please try again later.";
-
-                return back()->withErrors(['email' => $message])->withInput($request->except('password'));
-            } else {
-                Cache::forget($suspendKey);
-                Cache::forget($failuresKey);
-            }
+            return back()->withErrors(['email' => 'An unexpected error occurred. Please try again later.'])
+                ->withInput($request->except('password'));
         }
 
-        // 2) Attempt authentication
-        try {
-            $request->authenticate();
-        } catch (ValidationException $e) {
+        // --- Normalize the API response into ($status, $data) ---
+        $status = 500;
+        $data = null;
+
+        // 1) If it's a Response-like object (Illuminate or Symfony), get status and content
+        if (is_object($apiResponse) && method_exists($apiResponse, 'getStatusCode')) {
+            try {
+                $status = (int) $apiResponse->getStatusCode();
+                // getContent returns the JSON string
+                $content = method_exists($apiResponse, 'getContent') ? $apiResponse->getContent() : null;
+                if ($content) {
+                    $decoded = json_decode($content, true);
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        $data = $decoded;
+                    } else {
+                        // If content is not json, wrap it
+                        $data = ['message' => $content];
+                    }
+                }
+            } catch (\Throwable $ex) {
+                Log::warning('Failed to extract content from API response', ['exception' => $ex]);
+            }
+        } elseif (is_array($apiResponse)) {
+            $data = $apiResponse;
+            $status = 200;
+        } elseif (is_object($apiResponse) && method_exists($apiResponse, 'getData')) {
+            try {
+                $data = $apiResponse->getData(true);
+                $status = method_exists($apiResponse, 'getStatusCode') ? (int) $apiResponse->getStatusCode() : 200;
+            } catch (\Throwable $ex) {
+                Log::warning('Failed to getData() from API response', ['exception' => $ex]);
+            }
+        } elseif (is_string($apiResponse)) {
+            $data = ['message' => $apiResponse];
+            $status = 200;
+        }
+
+        // Ensure $data is array
+        $data = is_array($data) ? $data : (is_null($data) ? [] : (array) $data);
+
+        /* Log message to prove api used
+        Log::info('API login normalized response', ['email' => $email, 'status' => $status, 'data' => $data]);
+        */
+
+        // Failure due to invalid credentials or role mismatch
+        if (in_array($status, [401, 403], true)) {
             if ($user) {
                 $duration = $this->handleFailedAttempt($user, $failuresKey, $suspendKey);
+
                 if ($duration) {
                     return back()->withErrors([
                         'email' => "Your account has been temporarily suspended for {$duration} minute(s) due to multiple failed login attempts. We've sent an email notification to the account owner.",
@@ -70,73 +109,63 @@ class AuthenticatedSessionController extends Controller
                 }
             }
 
-            return back()->withErrors(['email' => 'Incorrect username or password. Please try again.'])
-                ->withInput($request->except('password'));
+            $message = $data['message'] ?? 'Incorrect username or password. Please try again.';
+            return back()->withErrors(['email' => $message])->withInput($request->except('password'));
         }
 
-        // Regenerate session for security 
-        $request->session()->regenerate();
+        // Validation or other non-success
+        if ($status !== 200) {
+            $message = $data['message'] ?? 'Login failed.';
+            $errors = $data['errors'] ?? null;
+            if (is_array($errors) && !empty($errors)) {
+                return back()->withErrors($errors)->withInput($request->except('password'));
+            }
+            return back()->withErrors(['email' => $message])->withInput($request->except('password'));
+        }
 
-        // 3) Role check — normalize values
-        $selectedRole = strtolower(trim((string) $request->input('role', '')));
-        $userRole = strtolower(trim((string) (auth()->user()->role ?? '')));
+        // Success: expect data['user'] and login the web user
+        if (isset($data['user']['id'])) {
+            $user = User::find($data['user']['id']) ?: User::where('email', $email)->first();
 
-        // Debug log 
-        \Log::info('Login role check', [
+            if ($user) {
+                Auth::login($user);
+                $request->session()->regenerate();
+
+                // clear failure counters on successful login
+                Cache::forget($failuresKey);
+                if ($suspendKey)
+                    Cache::forget($suspendKey);
+
+                $userRole = strtolower(trim((string) ($user->role ?? '')));
+
+                return redirect()->intended(match ($userRole) {
+                    'teacher' => route('teacher.dashboard', absolute: false),
+                    'student' => route('dashboard', absolute: false),
+                    default => route('dashboard', absolute: false),
+                });
+            }
+
+            return back()->withErrors(['email' => 'Login succeeded but local user not found.'])->withInput($request->except('password'));
+        }
+
+        // Unexpected payload
+        Log::warning('API login returned unexpected payload to web store() (post-normalize)', [
             'email' => $email,
-            'selectedRole' => $selectedRole,
-            'userRole' => $userRole,
+            'status' => $status,
+            'payload' => $data,
         ]);
 
-        // If role mismatch -> count failure (same logic)
-        if ($selectedRole !== $userRole) {
-            if ($user) {
-                $duration = $this->handleFailedAttempt($user, $failuresKey, $suspendKey);
-            } else {
-                $duration = null;
-            }
-
-            Auth::guard('web')->logout();
-            $request->session()->regenerateToken();
-
-            if (!empty($duration)) {
-                return back()->withErrors([
-                    'email' => "Your account has been temporarily suspended for {$duration} minute(s) due to multiple failed login attempts. We've sent an email notification to the account owner.",
-                ])->withInput($request->except('password'));
-            }
-
-            return back()->withErrors([
-                'role' => 'Selected role does not match the role associated with this account.',
-            ])->withInput($request->except('password'));
-        }
-
-        // 4) Now login is fully successful (credentials + role), and clear counters
-        if ($user) {
-            Cache::forget($failuresKey);
-            if ($suspendKey)
-                Cache::forget($suspendKey);
-        }
-
-        // store role and redirect
-        session(['role' => $userRole]);
-
-        return redirect()->intended(match ($userRole) {
-            'teacher' => route('teacher.dashboard', absolute: false),
-            'student' => route('dashboard', absolute: false),
-        });
+        return back()->withErrors(['email' => 'Unexpected login response.'])->withInput($request->except('password'));
     }
 
 
 
-    /**
-     * Handle a failed login-related attempt (password or role mismatch).
-     * Increments the failure counter and, if thresholds reached, sets a suspension and notifies the user.
-     */
+
+    //original function for handling failed attempts, and sending suspension emails
     protected function handleFailedAttempt(User $user, string $failuresKey, ?string $suspendKey): ?int
     {
         $decayMinutes = 60;
 
-        // Use get/put so it works with file/database/cache drivers (not only increment-capable drivers)
         $attempts = (int) Cache::get($failuresKey, 0);
         $attempts++;
         Cache::put($failuresKey, $attempts, now()->addMinutes($decayMinutes));
@@ -175,16 +204,18 @@ class AuthenticatedSessionController extends Controller
                 Log::warning('Failed to send suspension email: ' . $mailEx->getMessage());
             }
 
-            // log suspension event
+            /* Log into laravel.log to show user suspended
             Log::info('User suspended', [
                 'user_id' => $user->id,
                 'suspend_minutes' => $duration,
                 'until' => $until->toDateTimeString(),
             ]);
+            */
         }
 
         return $duration;
     }
+
 
     /**
      * Destroy an authenticated session.

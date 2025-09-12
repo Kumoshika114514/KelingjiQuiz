@@ -14,6 +14,8 @@ class RoleMiddleware
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
+
+    //original function 
     public function handle(Request $request, Closure $next, $role): Response
     {
         // If not logged in
@@ -32,5 +34,38 @@ class RoleMiddleware
         }
 
         return $next($request);
+    }
+
+    // Identifying roles using API tokens
+    public function APIhandle(Request $request, Closure $next, $role)
+    {
+        $user = $request->user();
+
+        if (! $user) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        // If token exists, check token abilities for their role
+        $token = $user->currentAccessToken();
+        if ($token) {
+            $abilities = $token->abilities ?? [];
+            foreach ($abilities as $ability) {
+                if (str_starts_with($ability, 'role:')) {
+                    $tokenRole = substr($ability, strlen('role:'));
+                    if ($tokenRole === $role) {
+                        return $next($request);
+                    } else {
+                        return response()->json(['message' => 'Forbidden - insufficient role'], 403);
+                    }
+                }
+            }
+        }
+
+        // fallback: check DB role
+        if (isset($user->role) && $user->role === $role) {
+            return $next($request);
+        }
+
+        return response()->json(['message' => 'Forbidden - insufficient role'], 403);
     }
 }

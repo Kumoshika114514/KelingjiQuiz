@@ -109,6 +109,11 @@ Route::middleware(['auth', 'verified'])->prefix('api/teacher')->group(function (
     Route::get('/quizclass/{quizclass}/students', [QuizClassController::class, 'loadClassStudents']);
 });
 
+// API routes for students 
+Route::middleware(['auth', 'role:student'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+});
+
 
 
 require __DIR__ . '/auth.php';
