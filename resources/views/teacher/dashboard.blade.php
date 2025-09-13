@@ -5,7 +5,7 @@
                 {{ __('My Classes') }}
             </h2>
             <a href="{{ route('quizclasses.create') }}"
-                class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-lg shadow text-base">
+                class="bg-blue-500 hover:bg-blue-700 dark:text-white py-2 px-4 rounded-lg shadow text-base">
                 Create Class
             </a>
         </div>

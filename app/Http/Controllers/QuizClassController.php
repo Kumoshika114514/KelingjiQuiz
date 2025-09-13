@@ -43,7 +43,7 @@ class QuizClassController extends Controller
         return $code;
     }
 
-    // Original quiz class show function (not using)
+    // quiz class show function (not used, switched to API approach)
     public function show($id)
     {
         $quizClass = QuizClass::with(['students', 'questionSets'])->findOrFail($id);
@@ -59,7 +59,7 @@ class QuizClassController extends Controller
     {
         $quizClass = QuizClass::findOrFail($id);
 
-        // Only allow the owner (teacher)
+        // only allow the owner (teacher)
         if ($quizClass->user_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
