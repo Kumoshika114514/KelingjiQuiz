@@ -62,6 +62,32 @@ Route::middleware(['auth', RoleMiddleware::class . ':teacher'])->group(function 
             Route::post('/questions/reorder', [QuestionController::class, 'reorder'])->name('reorder');
         });
 
+    Route::prefix('teacher/quizclass/{quizClassId}')->group(function () {
+    Route::get('/questionsets/create', [QuestionSetController::class, 'create'])
+        ->name('teacher.questionset.create');
+    Route::post('/questionsets', [QuestionSetController::class, 'store'])
+        ->name('teacher.questionset.store');
+
+    Route::get('/questionsets/{questionSetId}', [QuestionSetController::class, 'show'])
+        ->name('teacher.questionset');
+
+    Route::post('/questionsets/{questionSetId}/schedule', [QuestionSetController::class, 'schedule'])
+        ->name('teacher.questionset.schedule');
+    Route::post('/questionsets/{questionSetId}/activate', [QuestionSetController::class, 'activate'])
+        ->name('teacher.questionset.activate');
+    Route::post('/questionsets/{questionSetId}/disable', [QuestionSetController::class, 'disable'])
+        ->name('teacher.questionset.disable');
+    Route::post('/questionsets/{questionSetId}/close', [QuestionSetController::class, 'close'])
+        ->name('teacher.questionset.close');
+    Route::post('/questionsets/{questionSetId}/archive', [QuestionSetController::class, 'archive'])
+        ->name('teacher.questionset.archive');
+
+    Route::post('/questionsets/{questionSetId}/toggle', [QuestionSetController::class, 'toggleStatus'])
+        ->name('teacher.questionset.toggle');
+    Route::get('/questionsets/{questionSetId}/highest-score', [QuestionSetController::class, 'getHighestScore'])
+        ->name('teacher.questionset.highest');
+});
+
 });
 
 // global routes
@@ -107,11 +133,6 @@ Route::middleware(['auth', 'verified'])->prefix('api/teacher')->group(function (
     Route::patch('/quizclass/{quizclass}/questionsets/{questionset}/toggle', [QuestionSetController::class, 'toggleStatus']);
 
     Route::get('/quizclass/{quizclass}/students', [QuizClassController::class, 'loadClassStudents']);
-});
-
-// API routes for students 
-Route::middleware(['auth', 'role:student'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 });
 
 

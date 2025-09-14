@@ -13,15 +13,19 @@
             </div>
 
             <div class="bg-white dark:bg-white shadow sm:rounded-lg p-6 space-y-6">
-                <div>
-                    <div class="text-sm text-gray-600 dark:text-black">
-                        Time limit for this question:
-                        <span class="font-medium">
-                            {{ $question->time_limit_sec ? $question->time_limit_sec.' sec' : ($questionSet->answer_time ? $questionSet->answer_time.' min (set-level)' : 'No limit') }}
-                        </span>
-                    </div>
+                <div>                  
                     <h3 class="mt-2 text-lg font-semibold text-gray-900 dark:text-black">{{ $question->text }}</h3>
                 </div>
+
+                @if (!empty($question->image_path))
+                    <div>
+                        <img
+                            src="{{ asset('storage/'.$question->image_path) }}"
+                            alt="Question image"
+                            class="w-full max-h-80 object-contain rounded border border-gray-200"
+                        >
+                    </div>
+                @endif
 
                 <form>
                     @if ($questionSet->question_type === 'mcq')

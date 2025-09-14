@@ -14,7 +14,7 @@
                 class="inline-flex items-center text-gray-600 hover:text-gray-900 transition">
                 &lt; Back
             </a>
-            <form method="POST" action="{{ route('quizclasses.questionsets.store', $quizclassId) }}" class="space-y-6">
+            <form method="POST" action="{{ route('quizclasses.questionsets.store', $quizClassId) }}" class="space-y-6">
                 @csrf
 
                 <!-- Topic -->
