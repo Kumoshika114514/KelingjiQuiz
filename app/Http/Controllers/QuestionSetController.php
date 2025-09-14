@@ -19,7 +19,6 @@ class QuestionSetController extends Controller
 
     public function store(Request $request, $quizClassId)
     {
-        // Validate inputs
         $validated = $request->validate([
             'topic' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -30,10 +29,9 @@ class QuestionSetController extends Controller
             'is_realtime' => 'nullable|boolean',
         ]);
 
-        // Find the QuizClass (make sure it exists)
+        // make sure the quiz class exists
         $quizClass = QuizClass::findOrFail($quizClassId);
 
-        // Create QuestionSet under this QuizClass
         $quizClass->questionSets()->create([
             'topic' => $validated['topic'],
             'description' => $validated['description'] ?? null,
@@ -43,11 +41,10 @@ class QuestionSetController extends Controller
             'end_time' => $validated['end_time'],
             'is_realtime' => $request->has('is_realtime'),
             'is_active' => true,
-            'question_count'=> 0, 
+            'question_count' => 0,
             'user_id' => Auth::id(),
         ]);
 
-        // Redirect back to the quizclass page
         return Redirect::route('teacher.quizclass', $quizClassId)
             ->with('success', 'Question set created successfully.');
     }
@@ -59,11 +56,22 @@ class QuestionSetController extends Controller
         return view('teacher.questionset', compact('questionSet'));
     }
 
-     public function toggleStatus($quizclass, $questionset)
+    public function toggleStatus($quizclass, $questionset)
     {
         try {
-            $set = QuestionSet::findOrFail($questionset);
-            // 1 is active, 0 is disabled
+            $set = QuestionSet::where('id', $questionset)
+                ->where('quiz_class_id', $quizclass)
+                ->firstOrFail();
+
+            // make sure the user perform this action is the owner of the questionset
+            if ($set->quizClass->user_id !== Auth::id()) {
+                return Response::json([
+                    'success' => false,
+                    'message' => 'Unauthorized action.'
+                ], 403);
+            }
+
+            // toggle status (1 = active, 0 = disabled)
             $set->status = $set->status === 1 ? 0 : 1;
             $set->save();
 
@@ -84,7 +92,7 @@ class QuestionSetController extends Controller
         }
     }
 
-
+    // not used
     public function getHighestScore($quizclass, $questionset)
     {
         $highestScore = Statistic::getHighestScoreInQuiz($questionset);

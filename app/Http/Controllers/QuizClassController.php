@@ -69,6 +69,7 @@ class QuizClassController extends Controller
         ], 200);
     }
 
+    //load all question sets that belongs to the quiz class with id = $id
     public function loadClassQuestionSets($id)
     {
         $quizClass = QuizClass::with('questionSets')->findOrFail($id);
@@ -89,9 +90,17 @@ class QuizClassController extends Controller
         ], 200);
     }
 
+    // load all students that belongs to the quiz class with id = $id
     public function loadClassStudents($id)
     {
-        $quizClass = QuizClass::with('students')->findOrFail($id);
+        $quizClass = QuizClass::with([
+            'students' => function ($query) {
+                // use users.xxx otherwise will error because 
+                // both users and student_classes tables have a column named id
+                $query->select('users.id', 'users.name', 'users.email'); 
+            }
+        ])->findOrFail($id);
+
         $totalStudents = Statistic::totalStudentsInClass($id);
 
         if ($quizClass->user_id !== Auth::id()) {
@@ -104,12 +113,16 @@ class QuizClassController extends Controller
         ], 200);
     }
 
+    // redirect to edit page
     public function edit($id)
     {
         $quizClass = QuizClass::findOrFail($id);
         return view('teacher.editquizclass', compact('quizClass'));
 
     }
+
+    // update the quiz class detail
+    // when complete, go back to quiz class page with success message
     public function update(Request $request, $id)
     {
         $quizClass = QuizClass::findOrFail($id);
