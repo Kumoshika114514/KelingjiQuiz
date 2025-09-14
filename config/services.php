@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'class_svc' => [
+        'base_url' => env('CLASS_SVC_BASE', 'http://localhost'),
+        'token'    => env('CLASS_SVC_TOKEN', ''), 
+    ],
+
+
 ];

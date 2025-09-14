@@ -17,7 +17,7 @@ class QuestionSetController extends Controller
     protected function assertBelongs(QuizClass $class, QuestionSet $set): void
     {
         abort_unless((int)$set->class_id === (int)$class->id, 404);
-        // Optional: also ensure the teacher owns the class
+        // UI/teacher flows: ensure the teacher owns the class
         abort_unless((int)$class->user_id === (int)Auth::id(), 403);
     }
 
@@ -32,7 +32,7 @@ class QuestionSetController extends Controller
     {
         $data = $request->validate([
             'topic'         => 'required|string|max:255',
-            'description'   => 'required|string|max:2000', 
+            'description'   => 'required|string|max:2000',
             'question_type' => 'required|string|in:mcq,true_false,short_answer',
             'answer_time'   => 'required|integer|min:5|max:7200',
             'start_time'    => 'required|date',
@@ -53,8 +53,8 @@ class QuestionSetController extends Controller
             'is_realtime'    => (bool)$request->boolean('is_realtime'),
             'question_count' => 0,
             'user_id'        => Auth::id(),
-            'is_active'      => false,       
-            'state'          => 'SCHEDULED', 
+            'is_active'      => false,
+            'state'          => 'SCHEDULED',
         ]);
 
         return Redirect::route('teacher.quizclass', $quizClassId)
@@ -138,44 +138,74 @@ class QuestionSetController extends Controller
     /* ---------------- JSON helpers ---------------- */
 
     /**
-     * Backward-compatible toggle endpoint used by your existing UI.
-     * If set is ACTIVE -> close; otherwise try to activate (or go back to draft via disable when in SCHEDULED).
+     * Toggle endpoint usable by:
+     *  - Your Blade UI (session auth)
+     *  - Teammates via API (Sanctum bearer token with ability "toggle-questionset")
+     *
+     * If ACTIVE -> close; otherwise -> activate.
+     * Returns normalized JSON: success, state ("ACTIVE"/...), status (1/0), message.
      */
     public function toggleStatus($quizClassId, $questionSetId)
     {
         try {
             $class = QuizClass::findOrFail($quizClassId);
             $set   = QuestionSet::findOrFail($questionSetId);
-            $this->assertBelongs($class, $set);
 
-            $state = strtoupper((string)$set->state);
+            // Ownership check for normal UI; allow service tokens with ability to bypass
+            $user = Auth::user();
+            $hasAbility = method_exists($user, 'currentAccessToken')
+                && $user->currentAccessToken()
+                && $user->tokenCan('toggle-questionset');
 
-            if ($state === 'ACTIVE') {
+            if (!$hasAbility) {
+                // Normal path (UI teacher): must belong & be owner
+                abort_unless((int)$set->class_id === (int)$class->id, 404);
+                abort_unless((int)$class->user_id === (int)Auth::id(), 403);
+            } else {
+                // Service token path: still ensure the set belongs to the class
+                abort_unless((int)$set->class_id === (int)$class->id, 404);
+            }
+
+            $current = strtoupper((string)$set->state);
+
+            if ($current === 'ACTIVE') {
                 $set->close();
-                $newState = $set->fresh()->state;
+                $fresh = strtoupper((string)$set->fresh()->state);
                 return Response::json([
                     'success' => true,
-                    'state'   => $newState,
+                    'state'   => $fresh,
+                    'status'  => $fresh === 'ACTIVE' ? 1 : 0,
                     'message' => 'Question set closed.',
                 ], 200);
             }
 
-            // from DRAFT/SCHEDULED/CLOSED -> try to activate (your state classes enforce legality)
+            // from DRAFT/SCHEDULED/CLOSED -> try to activate (domain rules decide legality)
             $set->activate();
-            $newState = $set->fresh()->state;
+            $fresh = strtoupper((string)$set->fresh()->state);
 
             return Response::json([
                 'success' => true,
-                'state'   => $newState,
+                'state'   => $fresh,
+                'status'  => $fresh === 'ACTIVE' ? 1 : 0,
                 'message' => 'Question set activated.',
             ], 200);
 
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            return Response::json([
+                'success' => false,
+                'message' => 'Forbidden',
+            ], 403);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return Response::json([
+                'success' => false,
+                'message' => 'Not found',
+            ], 404);
         } catch (\Throwable $e) {
             return Response::json([
                 'success' => false,
                 'message' => 'Failed to change status.',
                 'error'   => config('app.debug') ? $e->getMessage() : null,
-            ], 422);
+            ], 500);
         }
     }
 

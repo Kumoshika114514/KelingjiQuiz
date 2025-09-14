@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\RegisterController;
 use App\Http\Controllers\Api\Auth\LoginController;
+use App\Http\Controllers\Api\AttemptController;
+use App\Http\Controllers\QuestionSetController;
 
 //public API routes, for register and login 
 Route::post('/register', [RegisterController::class, 'register'])->name('api.register');
@@ -18,3 +20,9 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
+Route::middleware('auth:sanctum')->post('/attempts', [AttemptController::class, 'store']);
+
+Route::middleware('auth:sanctum')->patch(
+    '/teacher/quizclass/{quizclass}/questionsets/{questionset}/toggle',
+    [QuestionSetController::class, 'toggleStatus']
+)->name('api.questionsets.toggle');
