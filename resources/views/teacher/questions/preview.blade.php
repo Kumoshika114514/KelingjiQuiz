@@ -9,19 +9,23 @@
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
             <div class="mb-4">
                 <a href="{{ route('teacher.questions.index', [$quizClass->id, $questionSet->id]) }}"
-                   class="text-sm text-gray-600 hover:underline">← Back to Questions</a>
+                   class="text-sm text-gray-600 dark:text-gray-200 hover:underline">← Back to Questions</a>
             </div>
 
-            <div class="bg-white dark:bg-gray-900 shadow sm:rounded-lg p-6 space-y-6">
-                <div>
-                    <div class="text-sm text-gray-600 dark:text-gray-300">
-                        Time limit for this question:
-                        <span class="font-medium">
-                            {{ $question->time_limit_sec ? $question->time_limit_sec.' sec' : ($questionSet->answer_time ? $questionSet->answer_time.' min (set-level)' : 'No limit') }}
-                        </span>
-                    </div>
-                    <h3 class="mt-2 text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $question->text }}</h3>
+            <div class="bg-white dark:bg-white shadow sm:rounded-lg p-6 space-y-6">
+                <div>                  
+                    <h3 class="mt-2 text-lg font-semibold text-gray-900 dark:text-black">{{ $question->text }}</h3>
                 </div>
+
+                @if (!empty($question->image_path))
+                    <div>
+                        <img
+                            src="{{ asset('storage/'.$question->image_path) }}"
+                            alt="Question image"
+                            class="w-full max-h-80 object-contain rounded border border-gray-200"
+                        >
+                    </div>
+                @endif
 
                 <form>
                     @if ($questionSet->question_type === 'mcq')

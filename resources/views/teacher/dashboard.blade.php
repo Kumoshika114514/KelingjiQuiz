@@ -1,11 +1,11 @@
 <x-teacher>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-2xl text-gray-800 leading-tight">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
                 {{ __('My Classes') }}
             </h2>
             <a href="{{ route('quizclasses.create') }}"
-                class="bg-blue-600 hover:bg-blue-700 dark:text-white font-medium py-2 px-4 rounded-lg shadow transition">
+                class="bg-blue-500 hover:bg-blue-700 dark:text-white py-2 px-4 rounded-lg shadow text-base">
                 Create Class
             </a>
         </div>
@@ -22,7 +22,7 @@
                 class="space-y-6">
 
                 <!-- show number of classes -->
-                <div class="text-lg font-semibold text-gray-800" x-show="totalClasses > 0">
+                <div class="text-lg font-semibold text-gray-800 dark:text-white" x-show="totalClasses > 0">
                     Total Class: <span x-text="totalClasses"></span>
                 </div>
 

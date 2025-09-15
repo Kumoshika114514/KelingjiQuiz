@@ -1,65 +1,141 @@
 <?php
 
 namespace App\Http\Controllers;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
+
 use App\Facades\Statistic;
 use App\Models\QuizClass;
 use App\Models\QuestionSet;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Redirect;
 
 class QuestionSetController extends Controller
 {
-    public function create($quizclassId)
+    /* ---------------- Helpers ---------------- */
+
+    protected function assertBelongs(QuizClass $class, QuestionSet $set): void
     {
-        return view('teacher.createquestionset', compact('quizclassId'));
+        abort_unless((int) $set->class_id === (int) $class->id, 404);
+        // UI/teacher flows: ensure the teacher owns the class
+        abort_unless((int) $class->user_id === (int) Auth::id(), 403);
     }
 
+    /* ---------------- Pages ---------------- */
+
+    public function create($quizClassId)
+    {
+        return view('teacher.createquestionset', compact('quizClassId'));
+    }
 
     public function store(Request $request, $quizClassId)
     {
-        // Validate inputs
-        $validated = $request->validate([
+        $data = $request->validate([
             'topic' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'required|string|max:2000',
             'question_type' => 'required|string|in:mcq,true_false,short_answer',
-            'answer_time' => 'required|integer|min:5',
+            'answer_time' => 'required|integer|min:5|max:7200',
             'start_time' => 'required|date',
             'end_time' => 'required|date|after:start_time',
             'is_realtime' => 'nullable|boolean',
         ]);
 
-        // Find the QuizClass (make sure it exists)
-        $quizClass = QuizClass::findOrFail($quizClassId);
+        $class = QuizClass::findOrFail($quizClassId);
+        abort_unless((int) $class->user_id === (int) Auth::id(), 403);
 
-        // Create QuestionSet under this QuizClass
-        $quizClass->questionSets()->create([
-            'topic' => $validated['topic'],
-            'description' => $validated['description'] ?? null,
-            'question_type' => $validated['question_type'],
-            'answer_time' => $validated['answer_time'],
-            'start_time' => $validated['start_time'],
-            'end_time' => $validated['end_time'],
-            'is_realtime' => $request->has('is_realtime'),
-            'is_active' => true,
-            'question_count'=> 0, 
+        $set = $class->questionSets()->create([
+            'topic' => $data['topic'],
+            'description' => $data['description'] ?? null,
+            'question_type' => $data['question_type'],
+            'answer_time' => $data['answer_time'],
+            'start_time' => $data['start_time'],
+            'end_time' => $data['end_time'],
+            'is_realtime' => (bool) $request->boolean('is_realtime'),
+            'question_count' => 0,
             'user_id' => Auth::id(),
+            'is_active' => false,
+            'state' => 'SCHEDULED',
         ]);
 
-        // Redirect back to the quizclass page
         return Redirect::route('teacher.quizclass', $quizClassId)
             ->with('success', 'Question set created successfully.');
     }
 
     public function show($quizClassId, $questionSetId)
     {
-        $questionSet = QuestionSet::findOrFail($questionSetId);
+        $class = QuizClass::findOrFail($quizClassId);
+        $set = QuestionSet::findOrFail($questionSetId);
+        $this->assertBelongs($class, $set);
 
-        return view('teacher.questionset', compact('questionSet'));
+        return view('teacher.questionset', [
+            'quizClass' => $class,
+            'questionSet' => $set,
+        ]);
     }
 
-     public function toggleStatus($quizclass, $questionset)
+    /* ---------------- State transitions ---------------- */
+
+    public function schedule(Request $request, $quizClassId, $questionSetId)
+    {
+        $class = QuizClass::findOrFail($quizClassId);
+        $set = QuestionSet::findOrFail($questionSetId);
+        $this->assertBelongs($class, $set);
+
+        $data = $request->validate([
+            'start' => 'nullable|date',
+            'end' => 'nullable|date|after:start',
+        ]);
+
+        $set->schedule($data['start'] ?? null, $data['end'] ?? null);
+
+        return back()->with('success', 'Quiz scheduled.');
+    }
+
+    public function activate($quizClassId, $questionSetId)
+    {
+        $class = QuizClass::findOrFail($quizClassId);
+        $set = QuestionSet::findOrFail($questionSetId);
+        $this->assertBelongs($class, $set);
+
+        $set->activate();
+
+        return back()->with('success', 'Quiz activated.');
+    }
+
+    public function disable($quizClassId, $questionSetId)
+    {
+        $class = QuizClass::findOrFail($quizClassId);
+        $set = QuestionSet::findOrFail($questionSetId);
+        $this->assertBelongs($class, $set);
+
+        $set->disable(); // Scheduled -> Draft, or Active -> Closed (as defined in your states)
+
+        return back()->with('success', 'Quiz disabled.');
+    }
+
+    public function close($quizClassId, $questionSetId)
+    {
+        $class = QuizClass::findOrFail($quizClassId);
+        $set = QuestionSet::findOrFail($questionSetId);
+        $this->assertBelongs($class, $set);
+
+        $set->close();
+
+        return back()->with('success', 'Quiz closed.');
+    }
+
+    public function archive($quizClassId, $questionSetId)
+    {
+        $class = QuizClass::findOrFail($quizClassId);
+        $set = QuestionSet::findOrFail($questionSetId);
+        $this->assertBelongs($class, $set);
+
+        $set->archive();
+
+        return back()->with('success', 'Quiz archived.');
+    }
+
+    public function toggleStatus($quizclass, $questionset)
     {
         try {
             $set = QuestionSet::findOrFail($questionset);
@@ -84,14 +160,14 @@ class QuestionSetController extends Controller
         }
     }
 
-
-    public function getHighestScore($quizclass, $questionset)
+    public function getHighestScore($quizClassId, $questionSetId)
     {
-        $highestScore = Statistic::getHighestScoreInQuiz($questionset);
+        $class = QuizClass::findOrFail($quizClassId);
+        $set = QuestionSet::findOrFail($questionSetId);
+        $this->assertBelongs($class, $set);
 
-        return Response::json([
-            'highestScore' => $highestScore,
-        ], 200);
+        $highestScore = Statistic::getHighestScoreInQuiz($questionSetId);
+
+        return Response::json(['highestScore' => $highestScore], 200);
     }
-
 }

@@ -15,6 +15,8 @@ class TeacherDashboardController extends Controller
         return view('teacher.dashboard', compact('quizClasses'));
     }
 
+    // get all classes that belongs to the teacher with id = Auth->id (current user)
+    // also get the number of classes using Statistic facade
     public function loadClasses()
     {
         $quizClasses = QuizClass::where('user_id', Auth::id())

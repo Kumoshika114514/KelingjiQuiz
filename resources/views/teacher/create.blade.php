@@ -31,7 +31,7 @@
                     <label class="block text-gray-700 font-medium mb-1">Description</label>
                     <textarea name="description"
                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 p-2"
-                        rows="4">{{ old('description') }}</textarea>
+                        rows="4" required>{{ old('description') }}</textarea>
                     @error('description')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror

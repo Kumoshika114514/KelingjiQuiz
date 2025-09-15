@@ -36,8 +36,8 @@ class StatisticService
 
     public function getHighestScoreInQuiz($quizId){
         /**
-         * Get the highest score from the question sets
-         * Count the answer from studentanswers table
+         * get the highest score from the question sets
+         * count the answer from studentanswers table
          * where the answer is correct (equal to answer_a in questions table)
          * which the questions belongs to the question sets
          */

@@ -1,7 +1,7 @@
 <x-teacher>
     <x-slot name="header">
         <div class="flex items-center space-x-4">
-            <h2 class="text-2xl font-semibold text-gray-800 leading-tight">
+            <h2 class="text-2xl font-semibold text-gray-800 leading-tight dark:text-gray-200">
                 Create New Question Set
             </h2>
         </div>
@@ -14,7 +14,7 @@
                 class="inline-flex items-center text-gray-600 hover:text-gray-900 transition">
                 &lt; Back
             </a>
-            <form method="POST" action="{{ route('quizclasses.questionsets.store', $quizclassId) }}" class="space-y-6">
+            <form method="POST" action="{{ route('quizclasses.questionsets.store', $quizClassId) }}" class="space-y-6">
                 @csrf
 
                 <!-- Topic -->
@@ -32,7 +32,7 @@
                 <div>
                     <label class="block text-gray-700 font-medium mb-1">Description</label>
                     <textarea name="description" rows="3"
-                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 p-2">{{ old('description') }}</textarea>
+                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 p-2" required>{{ old('description') }}</textarea>
                     @error('description')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
@@ -58,7 +58,7 @@
 
                 <!-- Answer Time -->
                 <div>
-                    <label class="block text-gray-700 font-medium mb-1">Answer Time (seconds)</label>
+                    <label class="block text-gray-700 font-medium mb-1">Answer Time (minutes)</label>
                     <input type="number" name="answer_time" value="{{ old('answer_time') }}"
                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 p-2"
                         required>
