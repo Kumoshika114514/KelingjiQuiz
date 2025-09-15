@@ -132,9 +132,11 @@ Route::middleware(['auth', RoleMiddleware::class . ':teacher', ClickjackingHeade
 });
 
 // Global routes
-Route::get('/', function () { return view('welcome'); })
+Route::get('/', function () {
+    return view('welcome'); })
     ->middleware(ClickjackingHeaders::class);
-Route::get('/about', function () { return view('about'); })
+Route::get('/about', function () {
+    return view('about'); })
     ->middleware(ClickjackingHeaders::class);
 
 Route::middleware(['auth', ClickjackingHeaders::class])->group(function () {
@@ -167,6 +169,7 @@ Route::middleware(['auth', 'verified', ClickjackingHeaders::class])->prefix('api
 
     Route::patch('/quizclass/{quizclass}/questionsets/{questionset}/toggle', [QuestionSetController::class, 'toggleStatus']);
     Route::get('/quizclass/{quizclass}/students', [QuizClassController::class, 'loadClassStudents']);
-});
+
+    });
 
 require __DIR__ . '/auth.php';
