@@ -96,4 +96,5 @@ class Question extends Model
         $ok = $this->checkAnswer($answer);
         return $ok === true ? (int)$this->points : 0;
     }
+
 }

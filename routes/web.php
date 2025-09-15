@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuizClassController;
 use App\Http\Controllers\QuestionSetController;
 use App\Http\Controllers\StudentClassController;
+use App\Http\Controllers\StudentQuizController;
 use App\Http\Controllers\TeacherDashboardController;
 use App\Http\Controllers\QuestionController;
 use Illuminate\Support\Facades\Route;
@@ -15,6 +16,19 @@ Route::middleware(['auth', RoleMiddleware::class . ':student'])->group(function 
     Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
     Route::get('/join', [StudentClassController::class, 'create'])->middleware(['auth', 'verified'])->name('studentclasses.join');
     Route::post('/', [StudentClassController::class, 'store'])->middleware(['auth', 'verified'])->name('studentclasses.store');
+
+    Route::get('/student/class/{classId}', [StudentClassController::class, 'show'])->name('student.viewClass');
+
+    Route::get('/student/quiz/{quizSetId}', [StudentQuizController::class, 'takeQuiz'])->name('student.quizzes.takeQuiz');
+
+    Route::post('/student/quizzes/{questionSetId}/submit', [StudentQuizController::class, 'submit'])
+        ->name('student.quizzes.submit');
+
+    Route::get('/student/quiz/history', [StudentQuizController::class, 'history'])
+    ->name('student.quizHistory');
+
+    Route::get('/student/quizzes/{questionSet}/summary', [StudentQuizController::class, 'summary'])
+    ->name('student.quizzes.summary');
 });
 
 //teacher's routes
@@ -108,7 +122,5 @@ Route::middleware(['auth', 'verified'])->prefix('api/teacher')->group(function (
 
     Route::get('/quizclass/{quizclass}/students', [QuizClassController::class, 'loadClassStudents']);
 });
-
-
 
 require __DIR__ . '/auth.php';

@@ -25,4 +25,9 @@ class QuestionSet extends Model
     {
         return $this->belongsTo(QuizClass::class, "class_id");
     }
+
+    public function questions()
+    {
+        return $this->hasMany(Question::class, 'question_set_id');
+    }
 }
