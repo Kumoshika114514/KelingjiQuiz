@@ -67,9 +67,13 @@ class QuestionSetController extends Controller
         $set = QuestionSet::findOrFail($questionSetId);
         $this->assertBelongs($class, $set);
 
+        $commentController = new CommentController();
+        $comments = $commentController->getComments($questionSetId);
+
         return view('teacher.questionset', [
             'quizClass' => $class,
             'questionSet' => $set,
+            'comments' => $comments,
         ]);
     }
 

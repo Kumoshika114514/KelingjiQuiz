@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" 
-class="{{ session('theme','light') === 'dark' ? 'dark' : '' }}">
+class="{{ session('theme', 'light') === 'dark' ? 'dark' : '' }}">
 
 <head>
     <meta charset="utf-8">
@@ -20,7 +20,11 @@ class="{{ session('theme','light') === 'dark' ? 'dark' : '' }}">
     <!-- Pop Up Message Box-->
     <div class="fixed top-0 inset-x-0 flex justify-center z-50">
         <div class="w-full max-w-md mt-4 space-y-2">
-            @if (session('success'))
+            @php
+                $successMessage = session('comment_success') ?? session('success');
+            @endphp
+
+            @if ($successMessage)
                 <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show"
                     x-transition:enter="transition ease-out duration-500"
                     x-transition:enter-start="-translate-y-full opacity-0"
@@ -28,11 +32,11 @@ class="{{ session('theme','light') === 'dark' ? 'dark' : '' }}">
                     x-transition:leave-start="translate-y-0 opacity-100"
                     x-transition:leave-end="-translate-y-full opacity-0"
                     class="bg-green-500 dark:text-white px-6 py-3 rounded shadow-lg text-center">
-                    {{ session('success') }}
+                    {{ $successMessage }}
                 </div>
             @endif
 
-            @if (session('success'))
+            @if (session('error'))
                 <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show"
                     x-transition:enter="transition ease-out duration-500"
                     x-transition:enter-start="-translate-y-full opacity-0"

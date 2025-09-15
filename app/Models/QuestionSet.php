@@ -93,4 +93,8 @@ class QuestionSet extends Model
     {
         return $this->hasMany(Question::class, 'question_set_id');
     }
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
 }

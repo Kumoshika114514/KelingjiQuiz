@@ -51,7 +51,7 @@ class="{{ session('theme','light') === 'dark' ? 'dark' : '' }}">
                 </div>
             @endif
 
-            @if (session('success'))
+            @if (session('error'))
                 <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show"
                     x-transition:enter="transition ease-out duration-500"
                     x-transition:enter-start="-translate-y-full opacity-0"

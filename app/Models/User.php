@@ -70,4 +70,13 @@ class User extends Authenticatable
             'class_id'
         );
     }
+
+    public function comments() 
+    {
+        return $this->hasMany(Comment::class);
+    }
+    public function commentLikes() 
+    {
+        return $this->hasMany(CommentLike::class);
+    }
 }
