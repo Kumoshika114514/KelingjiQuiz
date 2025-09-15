@@ -14,13 +14,23 @@ use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\Integrations\ClassSvcController;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Middleware\ClickjackingHeaders;
-use App\Http\Controllers\AttemptController;
 
 // student's routes
 Route::middleware(['auth', RoleMiddleware::class . ':student'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
     Route::get('/join', [StudentClassController::class, 'create'])->middleware(['auth', 'verified'])->name('studentclasses.join');
     Route::post('/', [StudentClassController::class, 'store'])->middleware(['auth', 'verified'])->name('studentclasses.store');
+    Route::get('/student/class/{class}', [StudentClassController::class, 'show'])
+        ->name('student.viewClass');
+    Route::get('/student/quiz/{questionSet}', [StudentQuizController::class, 'takeQuiz'])
+        ->name('student.quizzes.takeQuiz');
+    Route::post('/student/quiz/{questionSet}/submit', [StudentQuizController::class, 'submit'])
+        ->name('student.quizzes.submit');
+    Route::get('/student/quiz/{questionSet}/summary', [StudentQuizController::class, 'summary'])
+        ->name('student.quizzes.summary');
+    Route::post('/student/quiz/{questionSet}/live-update', [StudentQuizController::class, 'liveUpdate'])
+    ->name('student.quizzes.liveUpdate');    
+
 });
 
 

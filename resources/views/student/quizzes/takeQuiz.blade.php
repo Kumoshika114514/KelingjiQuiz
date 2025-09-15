@@ -1,4 +1,3 @@
-{{-- filepath: c:\xampp\htdocs\KelingjiQuiz\resources\views\student\quizzes\takeQuiz.blade.php --}}
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -8,6 +7,18 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <!-- Modern Real-Time Timer -->
+            <div class="flex items-center justify-center mb-6">
+                <div class="bg-gradient-to-r from-blue-500 to-green-400 text-white rounded-full px-6 py-3 shadow-lg flex items-center gap-3">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2" />
+                    </svg>
+                    <span id="timer" class="text-2xl font-mono font-bold tracking-widest"></span>
+                </div>
+            </div>
+            <input type="hidden" id="time_left" name="time_left" value="">
+
             <!-- Quiz Description Section -->
             <div class="bg-white shadow-sm rounded-lg p-6 mb-6">
                 <h3 class="font-semibold text-lg">Description:</h3>
@@ -97,4 +108,37 @@
             </form>
         </div>
     </div>
+
+    <!-- Real-Time Timer & Live Monitoring Script -->
+    <script>
+        // Timer setup
+        let timeLimit = {{ $questionSet->time_limit ? $questionSet->time_limit * 60 : 300 }};
+        let timerDisplay = document.getElementById('timer');
+        let timeLeftInput = document.getElementById('time_left');
+
+        function updateTimer() {
+            let minutes = Math.floor(timeLimit / 60);
+            let seconds = timeLimit % 60;
+            timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            timeLeftInput.value = timeLimit;
+            if (timeLimit <= 0) {
+                alert('Time is up! Your quiz will be submitted automatically.');
+                document.querySelector('form').submit();
+            } else {
+                timeLimit--;
+                setTimeout(updateTimer, 1000);
+            }
+        }
+        updateTimer();
+
+        // Live monitoring: send progress every 10 seconds
+        setInterval(function() {
+            let formData = new FormData(document.querySelector('form'));
+            fetch("{{ route('student.quizzes.liveUpdate', $questionSet->id) }}", {
+                method: "POST",
+                headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
+                body: formData
+            });
+        }, 10000);
+    </script>
 </x-app-layout>

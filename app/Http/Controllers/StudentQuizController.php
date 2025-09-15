@@ -107,4 +107,12 @@ class StudentQuizController extends Controller
 
         return view('student.quizzes.summary', compact('questionSet', 'answers'));
     }
+
+    public function liveUpdate(Request $request, $questionSetId)
+    {
+        // You can save partial answers or update a "last seen" timestamp for monitoring
+        // Example: store in a QuizAttempt or a temp table for teacher monitoring
+        // For now, just return OK
+        return response()->json(['status' => 'ok']);
+    }
 }

@@ -8,5 +8,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StudentAnswer extends Model
 {
-    //
+    use HasFactory;
+
+    protected $fillable = [
+        'user_id',
+        'question_id',
+        'question_set_id',
+        'answer',
+    ];
 }
