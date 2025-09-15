@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Auth\RegisterController;
 use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\AttemptController;
 use App\Http\Controllers\QuestionSetController;
+use App\Http\Controllers\QuizClassController;
 
 //public API routes, for register and login 
 Route::post('/register', [RegisterController::class, 'register'])->name('api.register');
@@ -26,3 +27,5 @@ Route::middleware('auth:sanctum')->patch(
     '/teacher/quizclass/{quizclass}/questionsets/{questionset}/toggle',
     [QuestionSetController::class, 'toggleStatus']
 )->name('api.questionsets.toggle');
+
+Route::middleware('auth:sanctum')->get('/classes/{id}/students', [QuizClassController::class, 'loadClassStudents']);

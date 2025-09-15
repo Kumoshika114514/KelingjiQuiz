@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Strategies\CommentSortingStrategies\SortByLikes;
 use App\Strategies\CommentSortingStrategies\SortByLatest;
 use App\Strategies\CommentSortingStrategies\SortByOldest;
 use App\Services\SortingContext;
 use App\Models\Comment;
 use App\Models\CommentLike;
-use app\Models\QuestionSet;
+use App\Models\QuestionSet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
@@ -45,6 +47,10 @@ class CommentController extends Controller
             'question_set_id' => 'required|exists:question_sets,id',
         ]);
 
+        // if (! $this->isEnrolled($request->question_set_id)) {
+        //     abort(403, 'You must be in this class to post a comment.');
+        // }
+
         Comment::create([
             'comment_content' => $request->comment_content,
             'user_id' => Auth::id(),
@@ -63,6 +69,10 @@ class CommentController extends Controller
             'question_set_id' => 'required|exists:question_sets,id',
             'parent_id' => 'nullable|exists:comments,id',
         ]);
+
+        // if (! $this->isEnrolled($request->question_set_id)) {
+        //     abort(403, 'You must be in this class to reply.');
+        // }
 
         Comment::create([
             'comment_content' => $request->comment_content,
@@ -101,6 +111,10 @@ class CommentController extends Controller
             'comment_content' => 'required|string|max:500',
         ]);
 
+        // if (! $this->isEnrolled($comment->question_set_id)) {
+        //     abort(403, 'You cannot edit this comment (not in this class).');
+        // }
+
         $comment->update([
             'comment_content' => $request->comment_content,
         ]);
@@ -115,6 +129,10 @@ class CommentController extends Controller
     {
         $this->authorize('delete', $comment);
 
+        // if (! $this->isEnrolled($comment->question_set_id)) {
+        //     abort(403, 'You cannot delete this comment (not in this class).');
+        // }
+
         $comment->delete();
 
         return back()->with('comment_success', 'Comment deleted successfully!');
@@ -122,6 +140,10 @@ class CommentController extends Controller
     
     public function like(Comment $comment)
     {
+        // if (! $this->isEnrolled($comment->question_set_id)) {
+        //     abort(403, 'You cannot like this comment (not in this class).');
+        // }
+
         $like = CommentLike::firstOrCreate(
             ['comment_id' => $comment->id, 'user_id' => Auth::id()]
         );
@@ -154,4 +176,44 @@ class CommentController extends Controller
 
         return $comments;
     }
+
+    private function isEnrolled($questionSetId)
+    {
+        $questionSet = QuestionSet::findOrFail($questionSetId);
+        $classId = $questionSet->class_id;
+
+        $baseUrl = config('services.class_service.url'); 
+        $token = Auth::user()->createToken('comment-module')->plainTextToken;
+
+        $response = Http::withToken($token)
+            ->get("{$baseUrl}/api/classes/{$classId}/students");
+
+        if ($response->failed()) {
+            return false;
+        }
+
+        $students = $response->json('students');
+        return collect($students)->contains(fn ($student) => $student['id'] === Auth::id());
+    }
+
+    // load all comments that belongs to the user with id = $id
+    // public function loadUserComments($id)
+    // {
+    //     $user = User::with([
+    //         'comments' => function ($query) {
+    //             $query->select('comments.id', 'comments.comment_content'); 
+    //         }
+    //     ])->findOrFail($id);
+
+    //     $totalComments = Statistic::totalCommentsInClass($id);
+
+    //     if ($quizClass->user_id !== Auth::id()) {
+    //         return response()->json(['message' => 'Unauthorized'], 403);
+    //     }
+
+    //     return Response::json([
+    //         'totalComments' => $totalComments,
+    //         'comments' => $user->comments,
+    //     ], 200);
+    // }
 }

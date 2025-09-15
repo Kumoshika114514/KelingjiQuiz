@@ -11,8 +11,9 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Get all classes the student is enrolled in, with quizzes and questions eager loaded
-        $quizClasses = QuizClass::with(['questionSets.questions'])->get();
+        $quizClasses = QuizClass::whereHas('studentClasses', function ($q) {
+            $q->where('student_id', auth()->id());
+        })->with(['questionSets.questions'])->get();
 
         foreach ($quizClasses as $class) {
             // Filter quizzes that are active, within time window, and is_active
