@@ -105,7 +105,10 @@ class StudentQuizController extends Controller
             ->get()
             ->keyBy('question_id');
 
-        return view('student.quizzes.summary', compact('questionSet', 'answers'));
+        $commentController = new CommentController();
+        $comments = $commentController->getComments($questionSetId);
+
+        return view('student.quizzes.summary', compact('questionSet', 'answers', 'comments'));
     }
 
     public function liveUpdate(Request $request, $questionSetId)
