@@ -14,7 +14,7 @@
                         <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2" />
                     </svg>
-                    <span id="timer" class="text-2xl font-mono font-bold tracking-widest"></span>
+                    <span id="timer" class="text-2xl font-mono font-bold tracking-widest" style="color: black;"></span>
                 </div>
             </div>
             <input type="hidden" id="time_left" name="time_left" value="">

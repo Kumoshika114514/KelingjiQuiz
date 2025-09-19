@@ -12,14 +12,17 @@
                 @php
                     $total = $questionSet->questions->count();
                     $score = 0;
-                    foreach($questionSet->questions as $question) {
+                    foreach ($questionSet->questions as $question) {
                         $studentAnswer = $answers[$question->id]->answer ?? null;
                         if ($question->correct_choice && $studentAnswer) {
-                            if (strtolower($studentAnswer) == strtolower($question->correct_choice)) $score++;
+                            if (strtolower($studentAnswer) == strtolower($question->correct_choice))
+                                $score++;
                         } elseif ($question->correct_text && $studentAnswer) {
-                            if (trim(strtolower($studentAnswer)) == trim(strtolower($question->correct_text))) $score++;
+                            if (trim(strtolower($studentAnswer)) == trim(strtolower($question->correct_text)))
+                                $score++;
                         } elseif (!is_null($question->correct_bool) && !is_null($studentAnswer)) {
-                            if (strtolower($studentAnswer) == ($question->correct_bool ? 'true' : 'false')) $score++;
+                            if (strtolower($studentAnswer) == ($question->correct_bool ? 'true' : 'false'))
+                                $score++;
                         }
                     }
                 @endphp
@@ -28,7 +31,7 @@
                         <span class="text-lg font-bold text-blue-700">Your Score: {{ $score }} / {{ $total }}</span>
                     </div>
                     <a href="{{ route('student.viewClass', $questionSet->class_id) }}"
-                       class="inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded">
+                        class="inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded">
                         ← Back to Class
                     </a>
                 </div>
@@ -63,7 +66,11 @@
                             <div class="font-semibold mb-1">Q: {{ $question->text ?? '[No question text]' }}</div>
                             <div>
                                 <span class="font-semibold">Your Answer:</span>
-                                {{ $studentAnswer ?? '-' }}
+                                @if($studentAnswer !== null)
+                                    {{ $studentAnswer == 1 ? 'True' : 'False' }} <!-- Handle 1 as True and 0 as False -->
+                                @else
+                                    -
+                                @endif
                             </div>
                             <div>
                                 <span class="font-semibold">Correct Answer:</span>

@@ -15,5 +15,18 @@ class StudentAnswer extends Model
         'question_id',
         'question_set_id',
         'answer',
+        'attempt_id',
     ];
+
+    public function attempt(): BelongsTo
+    {
+        return $this->belongsTo(Attempt::class, 'attempt_id'); // Link to the Attempt model
+    }
+
+    // Define the relationship to the Question model (if needed)
+    public function question(): BelongsTo
+    {
+        return $this->belongsTo(Question::class, 'question_id');
+    }
+    
 }

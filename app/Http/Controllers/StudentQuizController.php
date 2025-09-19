@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\QuestionSet;
-use App\Models\QuizAttempt;
+use App\Models\Attempt;
 use App\Models\StudentAnswer;
 use Illuminate\Http\Request;
 
@@ -34,17 +34,33 @@ class StudentQuizController extends Controller
 
         $validated = $request->validate($rules, $messages);
 
-        // Create a new QuizAttempt (optional, for tracking)
-        $quizAttempt = QuizAttempt::create([
-            'student_id' => auth()->id(),
-            'quiz_id' => $questionSet->id,
-            'started_at' => now(),
-            'completed_at' => now(),
-            'score' => 0, // will update later
-            'total_points' => $questionSet->questions->count(),
-            'is_completed' => true,
-            'attempt_number' => 1, // or increment if you support multiple attempts
-        ]);
+        // Check if the student has an existing attempt
+        $existingAttempt = Attempt::where('student_id', auth()->id())
+            ->where('question_set_id', $questionSet->id)
+            ->first();
+
+        if ($existingAttempt) {
+            // If an attempt exists, update it
+            $existingAttempt->update([
+                'completed_at' => now(),
+                'score' => 0, // Reset the score
+                'is_completed' => false, // Mark as not completed (you may handle this logic differently based on your use case)
+                'attempt_number' => $existingAttempt->attempt_number + 1, // Increment attempt number
+            ]);
+            $attempt = $existingAttempt; // Use the existing attempt
+        } else {
+            // If no attempt exists, create a new one
+            $attempt = Attempt::create([
+                'student_id' => auth()->id(),
+                'question_set_id' => $questionSet->id,
+                'started_at' => now(),
+                'completed_at' => now(),
+                'score' => 0,
+                'total_points' => $questionSet->questions->count(),
+                'is_completed' => false,
+                'attempt_number' => 1, // First attempt
+            ]);
+        }
 
         // Save student answers
         foreach ($questionSet->questions as $question) {
@@ -54,6 +70,7 @@ class StudentQuizController extends Controller
                 [
                     'user_id' => auth()->id(),
                     'question_id' => $question->id,
+                    'attempt_id' => $attempt->id,
                 ],
                 [
                     'answer' => $answer,
@@ -88,8 +105,8 @@ class StudentQuizController extends Controller
         }
 
         // Update score in QuizAttempt
-        $quizAttempt->score = $score;
-        $quizAttempt->save();
+        $attempt->score = $score;
+        $attempt->save();
 
         return redirect()->route('student.quizzes.summary', $questionSet->id)
             ->with('success', 'Quiz submitted successfully!');

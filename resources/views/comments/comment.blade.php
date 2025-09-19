@@ -1,8 +1,8 @@
 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 mb-6">
-    <div class="bg-white dark:bg-gray-900 shadow sm:rounded-lg p-6">
+    <div class="bg-white shadow sm:rounded-lg p-6">
 
         <div class="flex justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Comments</h3>
+            <h3 class="text-lg font-semibold text-gray-900">Comments</h3>
 
             <!-- Sort by -->
             <div class="relative" x-data="{ open: false }">

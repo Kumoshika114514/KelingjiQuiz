@@ -226,7 +226,7 @@ class QuestionController extends Controller
 
         $type = $this->normalizeType($question->type ?? $questionSet->question_type, $questionSet);
 
-        // ✅ No unique rule here — we handle swap ourselves
+        //No unique rule here — we handle swap ourselves
         $validated = $request->validate($this->rulesForType($type, true));
 
         // Optional image replace

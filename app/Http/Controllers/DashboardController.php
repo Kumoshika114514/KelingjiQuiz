@@ -11,17 +11,25 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        // Get all quiz classes that the student is enrolled in
         $quizClasses = QuizClass::whereHas('studentClasses', function ($q) {
             $q->where('student_id', auth()->id());
-        })->with(['questionSets.questions'])->get();
+        })
+            ->with([
+                'questionSets' => function ($query) {
+                    // Fetch only active question sets within the time window
+                    $query->where('status', 1)
+                        ->where('is_active', 1)
+                        ->where('start_time', '<=', now())
+                        ->where('end_time', '>=', now());
+                },
+                'questionSets.questions'
+            ]) // Load questions for each question set
+            ->get();
 
         foreach ($quizClasses as $class) {
-            // Filter quizzes that are active, within time window, and is_active
-            $allQuizzes = $class->questionSets
-                ->where('status', 1)
-                ->where('is_active', 1)
-                ->where('start_time', '<=', now())
-                ->where('end_time', '>=', now());
+            // Get all question IDs for these active quizzes
+            $allQuizzes = $class->questionSets;
 
             // Get all question IDs for these quizzes
             $allQuestionIds = $allQuizzes->flatMap->questions->pluck('id');
@@ -32,16 +40,20 @@ class DashboardController extends Controller
                 ->pluck('question_id')
                 ->unique();
 
-            // Count available quizzes (not fully completed)
+            // Count available quizzes (those that are not fully completed)
             $availableQuizzesCount = $allQuizzes->filter(function ($questionSet) use ($answeredQuestionIds) {
+                // Get the question IDs for the current quiz
                 $questionIds = $questionSet->questions->pluck('id');
-                return $questionIds->count() > 0 && !$questionIds->diff($answeredQuestionIds)->isEmpty();
+                // Check if the student hasn't answered all the questions in this quiz
+                return $questionIds->diff($answeredQuestionIds)->isNotEmpty();
             })->count();
 
-            // Attach the count to the class object
+            // Attach the count of available quizzes to the class object
             $class->available_quizzes_count = $availableQuizzesCount;
         }
 
+        // Pass quiz classes to the view
         return view('dashboard', compact('quizClasses'));
     }
+
 }

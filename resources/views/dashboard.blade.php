@@ -27,12 +27,12 @@
                                 </div>
                                 <p class="text-gray-600 mt-2 mb-4">{{ Str::limit($class->description, 60, '...') }}</p>
                             </div>
-                            <div class="flex items-center justify-between mt-auto">
+                            <!--<div class="flex items-center justify-between mt-auto">
                                 <span class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
                                     Quizzes Available: {{ $class->available_quizzes_count }}
                                 </span>
                                 <span class="text-gray-400 group-hover:text-blue-600 text-xl transition">&#8594;</span>
-                            </div>
+                            </div>-->
                         </div>
                     </a>
                 @empty

@@ -13,6 +13,7 @@ use App\Models\QuestionSet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Response;
 
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
@@ -199,21 +200,18 @@ class CommentController extends Controller
     // load all comments that belongs to the user with id = $id
     // public function loadUserComments($id)
     // {
-    //     $user = User::with([
-    //         'comments' => function ($query) {
-    //             $query->select('comments.id', 'comments.comment_content'); 
-    //         }
-    //     ])->findOrFail($id);
-
-    //     $totalComments = Statistic::totalCommentsInClass($id);
-
-    //     if ($quizClass->user_id !== Auth::id()) {
+    //     if ($id !== Auth::id()) {
     //         return response()->json(['message' => 'Unauthorized'], 403);
     //     }
 
+    //     User::findOrFail($id);
+
+    //     $comments = Comment::where('user_id', $id)
+    //         ->select('id', 'comment_content')
+    //         ->get();
+
     //     return Response::json([
-    //         'totalComments' => $totalComments,
-    //         'comments' => $user->comments,
+    //         'comments' => $comments,
     //     ], 200);
     // }
 }

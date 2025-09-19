@@ -30,8 +30,7 @@ Route::middleware(['auth', RoleMiddleware::class . ':student'])->group(function 
     Route::get('/student/quiz/{questionSet}/summary', [StudentQuizController::class, 'summary'])
         ->name('student.quizzes.summary');
     Route::post('/student/quiz/{questionSet}/live-update', [StudentQuizController::class, 'liveUpdate'])
-    ->name('student.quizzes.liveUpdate');    
-
+    ->name('student.quizzes.liveUpdate');
 });
 
 

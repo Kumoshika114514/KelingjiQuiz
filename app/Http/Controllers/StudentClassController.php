@@ -50,50 +50,39 @@ class StudentClassController extends Controller
 
     public function show($classId)
     {
-        // Fetch the class with related question sets and questions
+        // Fetch the class with all related question sets and questions
         $class = QuizClass::with('questionSets.questions')->findOrFail($classId);
 
-        // Get all question sets for this class (active and within time)
-        $allQuizzes = $class->questionSets()
-            ->where('start_time', '<=', now())
-            ->where('end_time', '>=', now())
-            ->where('status', 1)
-            ->where('is_active', 1)
-            ->get();
+        // Get all quizzes (question sets) for this class
+        $allQuizzes = $class->questionSets; // All question sets, no filters
 
-        // Get all question IDs for all quizzes in this class
+        // Get all question IDs for the quizzes
         $allQuestionIds = $allQuizzes->flatMap->questions->pluck('id');
 
-        // Get all question IDs the student has answered
+        // Get the student's answered question IDs
         $answeredQuestionIds = \App\Models\StudentAnswer::where('user_id', Auth::id())
             ->whereIn('question_id', $allQuestionIds)
             ->pluck('question_id')
             ->unique();
 
-        $availableQuizzesCount = $allQuizzes->filter(function ($questionSet) use ($answeredQuestionIds) {
+        // Separate quizzes into available and completed using collection methods
+        $availableQuizzes = $allQuizzes->filter(function ($questionSet) use ($answeredQuestionIds) {
             $questionIds = $questionSet->questions->pluck('id');
-            return $questionIds->count() > 0 && !$questionIds->diff($answeredQuestionIds)->isEmpty();
-        })->count();
+            // Available if the student hasn't answered any of the questions in the quiz
+            return $questionIds->diff($answeredQuestionIds)->isNotEmpty();
+        });
 
-        $class->available_quizzes_count = $availableQuizzesCount;
-
-        // Separate quizzes into completed and not completed
         $completedQuizzes = $allQuizzes->filter(function ($questionSet) use ($answeredQuestionIds) {
             $questionIds = $questionSet->questions->pluck('id');
-            // Completed if student answered ALL questions in this set
-            return $questionIds->count() > 0 && $questionIds->diff($answeredQuestionIds)->isEmpty();
+            // Completed if the student has answered all questions in the quiz
+            return $questionIds->diff($answeredQuestionIds)->isEmpty();
         });
 
-        $notCompletedQuizzes = $allQuizzes->filter(function ($questionSet) use ($answeredQuestionIds) {
-            $questionIds = $questionSet->questions->pluck('id');
-            // Not completed if there are unanswered questions
-            return $questionIds->count() > 0 && !$questionIds->diff($answeredQuestionIds)->isEmpty();
-        });
-
+        // Return the class view with available and completed quizzes
         return view('student.viewClass', [
             'class' => $class,
-            'availableQuizzes' => $notCompletedQuizzes,
-            'completedQuizzes' => $completedQuizzes
+            'availableQuizzes' => $availableQuizzes, // Display available quizzes
+            'completedQuizzes' => $completedQuizzes // Display completed quizzes
         ]);
     }
 }

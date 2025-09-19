@@ -11,7 +11,7 @@ class Attempt extends Model
     use HasFactory;
 
     // Server-owned fields are guarded so the client cannot set them directly
-    protected $guarded = [
+    protected $fillable = [
         'question_set_id',
         'student_id',
         'status',

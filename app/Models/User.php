@@ -79,4 +79,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(CommentLike::class);
     }
+
+    public static function getUserByUsername($username)
+    {
+        return User::where('username', $username)->first();
+    }
 }
