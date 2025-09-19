@@ -123,9 +123,12 @@ class StudentQuizController extends Controller
             ->keyBy('question_id');
 
         $commentController = new CommentController();
+        $sort = request()->query('sort', 'likes');
         $comments = $commentController->getComments($questionSetId);
 
-        return view('student.quizzes.summary', compact('questionSet', 'answers', 'comments'));
+        return view('student.quizzes.summary', compact('questionSet', 'answers', 'comments', 'sort') + [
+            'commentsBaseUrl' => route('student.quizzes.summary', $questionSet->id),
+        ]);
     }
 
     public function liveUpdate(Request $request, $questionSetId)

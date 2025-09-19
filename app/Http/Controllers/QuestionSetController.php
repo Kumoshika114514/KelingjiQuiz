@@ -68,12 +68,18 @@ class QuestionSetController extends Controller
         $this->assertBelongs($class, $set);
 
         $commentController = new CommentController();
+        $sort = request()->query('sort', 'likes');
         $comments = $commentController->getComments($questionSetId);
 
         return view('teacher.questionset', [
             'quizClass' => $class,
             'questionSet' => $set,
             'comments' => $comments,
+            'sort' => $sort,
+            'commentsBaseUrl' => route('teacher.questionset', [
+                'quizClassId' => $class->id,
+                'questionSetId' => $set->id,                 
+            ]),
         ]);
     }
 

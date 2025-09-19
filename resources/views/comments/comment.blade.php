@@ -11,12 +11,12 @@
                     Sort by
                 </button>
                 <div x-show="open" @click.away="open = false" class="absolute right-0 bg-white border rounded shadow mt-1 w-40">
-                    <a href="{{ route('teacher.questionset', ['quizClassId' => $questionSet->class_id, 'questionSetId' => $questionSet->id, 'sort' => 'likes']) }}"
-                        class="block px-4 py-2 hover:bg-gray-100 {{ $sort === 'likes' ? 'bg-gray-300' : '' }}">Most Liked</a>
-                    <a href="{{ route('teacher.questionset', ['quizClassId' => $questionSet->class_id, 'questionSetId' => $questionSet->id, 'sort' => 'latest']) }}"
-                        class="block px-4 py-2 hover:bg-gray-100 {{ $sort === 'latest' ? 'bg-gray-300' : '' }}">Latest</a>
-                    <a href="{{ route('teacher.questionset', ['quizClassId' => $questionSet->class_id, 'questionSetId' => $questionSet->id, 'sort' => 'oldest']) }}"
-                        class="block px-4 py-2 hover:bg-gray-100 {{ $sort === 'oldest' ? 'bg-gray-300' : '' }}">Oldest</a>
+                    <a href="{{ $commentsBaseUrl }}?sort=likes"
+                    class="block px-4 py-2 hover:bg-gray-100 {{ $sort === 'likes' ? 'bg-gray-300' : '' }}">Most Liked</a>
+                    <a href="{{ $commentsBaseUrl }}?sort=latest"
+                    class="block px-4 py-2 hover:bg-gray-100 {{ $sort === 'latest' ? 'bg-gray-300' : '' }}">Latest</a>
+                    <a href="{{ $commentsBaseUrl }}?sort=oldest"
+                    class="block px-4 py-2 hover:bg-gray-100 {{ $sort === 'oldest' ? 'bg-gray-300' : '' }}">Oldest</a>
                 </div>
             </div>
         </div>
